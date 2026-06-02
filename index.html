@@ -134,6 +134,8 @@
   .tier-legend { display: flex; gap: 14px; flex-wrap: wrap; }
   .tier-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
   .tier-dot  { width: 6px; height: 6px; border-radius: 50%; }
+  .btn.active { border-color: rgba(24,229,160,0.4); color: var(--green); background: var(--green-dim); }
+  .btn.active:hover { background: rgba(24,229,160,0.12); }
 
   table { width: 100%; border-collapse: collapse; }
   thead th {
@@ -294,7 +296,13 @@
 
   <div class="table-wrap">
     <div class="table-header">
-      <div class="table-title">Positions</div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="table-title">Positions</div>
+        <button class="btn" id="sortBtn" onclick="toggleSort()" title="Sort tickers A→Z / Z→A">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
+          <span id="sortLabel">A–Z</span>
+        </button>
+      </div>
       <div class="tier-legend">
         <div class="tier-item"><div class="tier-dot" style="background:var(--green)"></div>T1 &lt;10% → breakeven</div>
         <div class="tier-item"><div class="tier-dot" style="background:var(--teal)"></div>T2 10–30% → trail 15%</div>
@@ -304,8 +312,8 @@
     </div>
     <table>
       <thead><tr>
-        <th>Ticker</th>
-        <th>Buy price</th>
+        <th><span id="thTicker">Ticker <span id="sortArrow" style="opacity:0">↑</span></span></th>
+        <th>Buy price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ click to edit</span></th>
         <th>Current price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ click to edit</span></th>
         <th>Gain / Loss</th>
         <th>Tier</th>
@@ -319,7 +327,7 @@
 
   <footer>
     Prices via Yahoo Finance (multiple endpoints) · data may be delayed 15 min · for informational use only<br/>
-    Click any current price to edit manually &nbsp;·&nbsp; <a href="https://finance.yahoo.com" target="_blank">finance.yahoo.com</a>
+    Click any buy or current price to edit manually &nbsp;·&nbsp; <a href="https://finance.yahoo.com" target="_blank">finance.yahoo.com</a>
   </footer>
 </div>
 
@@ -339,6 +347,7 @@ const DEFAULTS = [
 
 // ─── STATE ────────────────────────────────────────────────────────────────────
 let portfolio = [];
+let sortState = 'none'; // 'none' | 'asc' | 'desc'
 
 function loadPortfolio() {
   try {
@@ -505,6 +514,25 @@ function getTier(gainPct, override) {
   return                       {label:'T4',      cls:'tier-4',  trailPct: 8};
 }
 
+// ─── SORT ─────────────────────────────────────────────────────────────────────
+function toggleSort() {
+  sortState = sortState === 'asc' ? 'desc' : sortState === 'desc' ? 'none' : 'asc';
+  const btn   = document.getElementById('sortBtn');
+  const label = document.getElementById('sortLabel');
+  const arrow = document.getElementById('sortArrow');
+  if (sortState === 'asc')  { btn.classList.add('active');    label.textContent = 'A–Z'; arrow.textContent = '↑'; arrow.style.opacity = '1'; }
+  if (sortState === 'desc') { btn.classList.add('active');    label.textContent = 'Z–A'; arrow.textContent = '↓'; arrow.style.opacity = '1'; }
+  if (sortState === 'none') { btn.classList.remove('active'); label.textContent = 'A–Z'; arrow.style.opacity = '0'; }
+  renderTable();
+}
+
+function getViewIndices() {
+  const idx = portfolio.map((_, i) => i);
+  if (sortState === 'asc')  idx.sort((a, b) => portfolio[a].ticker.localeCompare(portfolio[b].ticker));
+  if (sortState === 'desc') idx.sort((a, b) => portfolio[b].ticker.localeCompare(portfolio[a].ticker));
+  return idx;
+}
+
 // ─── RENDER TABLE ─────────────────────────────────────────────────────────────
 function renderTable() {
   const tbody = document.getElementById('tbody');
@@ -512,8 +540,10 @@ function renderTable() {
     tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state">No positions yet. Add one above.</div></td></tr>`;
     return;
   }
-  tbody.innerHTML = portfolio.map((p, i) => {
-    const cur     = p.curPrice;
+  const viewIndices = getViewIndices();
+  tbody.innerHTML = viewIndices.map(ri => {
+    const p   = portfolio[ri];
+    const cur = p.curPrice;
     const gainPct = cur != null ? (cur - p.buy) / p.buy * 100 : null;
     const tier    = getTier(gainPct, p.trail);
     const stop    = tier.trailPct == null ? null
@@ -528,24 +558,37 @@ function renderTable() {
          <div class="gain-bar-wrap"><div class="gain-bar ${gc}" style="width:${barW.toFixed(1)}%"></div></div>`
       : `<span class="gain-pct" style="color:var(--muted)">—</span>`;
 
+    // ── Buy price cell (always has a value, always editable) ──
+    const buyHTML =
+      `<span class="price-display" id="bpd-${ri}">
+         $${p.buy.toFixed(2)}
+         <svg class="edit-icon" onclick="startBuyEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit buy price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+       </span>
+       <span class="price-input-wrap" id="bpi-${ri}">
+         <input type="number" id="bpv-${ri}" step="0.01" min="0" value="${p.buy.toFixed(2)}" onkeydown="buyPriceKey(event,${ri})" style="width:88px" />
+         <button class="price-ok-btn" onclick="confirmBuyEdit(${ri})">✓</button>
+         <button class="price-cancel-btn" onclick="cancelBuyEdit(${ri})">✕</button>
+       </span>`;
+
+    // ── Current price cell ──
     const curHTML = cur != null
-      ? `<span class="price-display" id="pd-${i}">
+      ? `<span class="price-display" id="pd-${ri}">
            $${cur.toFixed(2)}
-           <svg class="edit-icon" onclick="startEdit(${i})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+           <svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
          </span>
-         <span class="price-input-wrap" id="pi-${i}">
-           <input type="number" id="pv-${i}" step="0.01" min="0" value="${cur.toFixed(2)}" onkeydown="priceKey(event,${i})" style="width:88px" />
-           <button class="price-ok-btn" onclick="confirmEdit(${i})">✓</button>
-           <button class="price-cancel-btn" onclick="cancelEdit(${i})">✕</button>
+         <span class="price-input-wrap" id="pi-${ri}">
+           <input type="number" id="pv-${ri}" step="0.01" min="0" value="${cur.toFixed(2)}" onkeydown="priceKey(event,${ri})" style="width:88px" />
+           <button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button>
+           <button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button>
          </span>`
-      : `<span class="price-display" id="pd-${i}">
+      : `<span class="price-display" id="pd-${ri}">
            <span class="price-loading">loading…</span>
-           <svg class="edit-icon" onclick="startEdit(${i})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Enter price manually"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
+           <svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Enter price manually"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
          </span>
-         <span class="price-input-wrap" id="pi-${i}">
-           <input type="number" id="pv-${i}" step="0.01" min="0" placeholder="enter price" onkeydown="priceKey(event,${i})" style="width:88px" />
-           <button class="price-ok-btn" onclick="confirmEdit(${i})">✓</button>
-           <button class="price-cancel-btn" onclick="cancelEdit(${i})">✕</button>
+         <span class="price-input-wrap" id="pi-${ri}">
+           <input type="number" id="pv-${ri}" step="0.01" min="0" placeholder="enter price" onkeydown="priceKey(event,${ri})" style="width:88px" />
+           <button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button>
+           <button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button>
          </span>`;
 
     const stopHTML = stop != null
@@ -561,20 +604,20 @@ function renderTable() {
 
     return `<tr>
       <td><div class="ticker-cell"><span class="ticker-sym">${esc(p.ticker)}</span><span class="ticker-name">${esc(p.name||'')}</span></div></td>
-      <td class="mono">$${p.buy.toFixed(2)}</td>
+      <td>${buyHTML}</td>
       <td>${curHTML}</td>
       <td><div class="gain-cell">${gainHTML}</div></td>
       <td><span class="tier-badge ${tier.cls}">${tier.label}</span></td>
       <td>${stopHTML}</td>
       <td>${protHTML}</td>
-      <td><button class="delete-btn" onclick="deleteStock(${i})" title="Remove ${esc(p.ticker)}">
+      <td><button class="delete-btn" onclick="deleteStock(${ri})" title="Remove ${esc(p.ticker)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button></td>
     </tr>`;
   }).join('');
 }
 
-// ─── INLINE PRICE EDIT ────────────────────────────────────────────────────────
+// ─── INLINE CURRENT PRICE EDIT ───────────────────────────────────────────────
 function startEdit(i) {
   document.getElementById(`pd-${i}`).style.display = 'none';
   const wrap = document.getElementById(`pi-${i}`);
@@ -590,16 +633,35 @@ function confirmEdit(i) {
   const val = parseFloat(document.getElementById(`pv-${i}`).value);
   if (!isNaN(val) && val > 0) {
     portfolio[i].curPrice = val;
-    save();
-    renderTable();
-    renderSummary();
-  } else {
-    cancelEdit(i);
-  }
+    save(); renderTable(); renderSummary();
+  } else { cancelEdit(i); }
 }
 function priceKey(e, i) {
   if (e.key === 'Enter')  confirmEdit(i);
   if (e.key === 'Escape') cancelEdit(i);
+}
+
+// ─── INLINE BUY PRICE EDIT ───────────────────────────────────────────────────
+function startBuyEdit(i) {
+  document.getElementById(`bpd-${i}`).style.display = 'none';
+  document.getElementById(`bpi-${i}`).style.display = 'inline-flex';
+  const inp = document.getElementById(`bpv-${i}`);
+  inp.focus(); inp.select();
+}
+function cancelBuyEdit(i) {
+  document.getElementById(`bpi-${i}`).style.display = 'none';
+  document.getElementById(`bpd-${i}`).style.display = '';
+}
+function confirmBuyEdit(i) {
+  const val = parseFloat(document.getElementById(`bpv-${i}`).value);
+  if (!isNaN(val) && val > 0) {
+    portfolio[i].buy = parseFloat(val.toFixed(4));
+    save(); renderTable(); renderSummary();
+  } else { cancelBuyEdit(i); }
+}
+function buyPriceKey(e, i) {
+  if (e.key === 'Enter')  confirmBuyEdit(i);
+  if (e.key === 'Escape') cancelBuyEdit(i);
 }
 
 // ─── SUMMARY ─────────────────────────────────────────────────────────────────
