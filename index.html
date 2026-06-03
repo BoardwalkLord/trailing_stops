@@ -266,10 +266,11 @@
   .th-tooltip-wrap:hover .th-tooltip { display: block; }
 
   /* BUYBACK CELL */
-  .buyback-cell { display: flex; flex-direction: column; gap: 3px; }
-  .buyback-price { font-family: var(--mono); font-size: 13px; font-weight: 500; color: var(--blue); }
-  .buyback-order { font-size: 10.5px; color: var(--muted); font-family: var(--mono); }
-  .buyback-order span { color: var(--teal); }
+  .buyback-cell { display: flex; flex-direction: column; gap: 4px; }
+  .bb-row { display: flex; align-items: baseline; gap: 6px; }
+  .bb-label { font-size: 10.5px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
+  .bb-value { font-family: var(--mono); font-size: 12.5px; font-weight: 500; color: var(--blue); white-space: nowrap; }
+  .bb-limit { color: var(--teal); }
 
   footer { border-top: 1px solid var(--border); padding: 18px 0; text-align: center; font-size: 11px; color: var(--muted); font-family: var(--mono); line-height: 1.7; }
   footer a { color: var(--muted2); text-decoration: none; }
@@ -675,15 +676,21 @@ function renderTable() {
       ? `<span class="protected ${protPct>=0?'pos':'neg'}">${protPct>=0?'+':''}${protPct.toFixed(1)}%</span>`
       : `<span class="protected na">—</span>`;
 
-    const bbLabel = tier.trailPct === null ? 'further dip'
-                  : tier.trailPct === 0   ? 'breakeven −5%'
-                  : `stop −${(tier.trailPct/2).toFixed(1)}%`;
+    const dipPct = tier.trailPct === null ? 5
+                 : tier.trailPct === 0   ? 5
+                 : tier.trailPct / 2;
+    const dipRef = tier.trailPct === null ? 'cur price' : 'stop price';
 
     const buybackHTML = buyback != null
       ? `<div class="buyback-cell">
-           <span class="buyback-price">$${buyback.toFixed(2)}</span>
-           <span class="buyback-order">X=$${buyback.toFixed(2)} · lim <span>$${bbLimit.toFixed(2)}</span></span>
-           <span class="buyback-order" style="color:var(--muted);font-size:10px">${bbLabel}</span>
+           <div class="bb-row">
+             <span class="bb-label">Trigger = ${dipPct}% below ${dipRef} =</span>
+             <span class="bb-value">$${buyback.toFixed(2)}</span>
+           </div>
+           <div class="bb-row">
+             <span class="bb-label">Limit buy = Trigger × 1.01 =</span>
+             <span class="bb-value bb-limit">$${bbLimit.toFixed(2)}</span>
+           </div>
          </div>`
       : `<span style="color:var(--muted);font-family:var(--mono)">—</span>`;
 
