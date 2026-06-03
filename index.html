@@ -1,294 +1,333 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
 <title>Portfolio · Trailing Stop Dashboard</title>
-<link rel="preconnect" href="https://fonts.googleapis.com" />
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet" />
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin/>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&family=Manrope:wght@400;500;600&display=swap" rel="stylesheet"/>
 <style>
-  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-  :root {
-    --bg:        #070c14;
-    --surface:   #0d1523;
-    --surface2:  #111e30;
-    --border:    rgba(255,255,255,0.07);
-    --border2:   rgba(255,255,255,0.13);
-    --text:      #e8edf5;
-    --muted:     #6b7a94;
-    --muted2:    #8e9db6;
-    --green:     #18e5a0;
-    --green-bg:  rgba(24,229,160,0.10);
-    --green-dim: rgba(24,229,160,0.06);
-    --red:       #ff4d6b;
-    --red-bg:    rgba(255,77,107,0.10);
-    --amber:     #ffb347;
-    --amber-bg:  rgba(255,179,71,0.10);
-    --blue:      #4fa3ff;
-    --blue-bg:   rgba(79,163,255,0.10);
-    --teal:      #00d4c8;
-    --teal-bg:   rgba(0,212,200,0.10);
-    --mono: 'JetBrains Mono', monospace;
-    --ui:   'Manrope', sans-serif;
-    --head: 'Syne', sans-serif;
-    --radius: 10px;
-    --radius-lg: 14px;
-  }
-  html { font-size: 14px; }
-  body {
-    background: var(--bg);
-    color: var(--text);
-    font-family: var(--ui);
-    min-height: 100vh;
-    background-image:
-      radial-gradient(ellipse 60% 40% at 10% 0%, rgba(24,229,160,0.04) 0%, transparent 60%),
-      radial-gradient(ellipse 50% 50% at 90% 100%, rgba(79,163,255,0.04) 0%, transparent 60%);
-  }
-  .container { max-width: 1200px; margin: 0 auto; padding: 0 24px; }
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+:root{
+  --bg:#070c14;--surface:#0d1523;--surface2:#111e30;
+  --border:rgba(255,255,255,0.07);--border2:rgba(255,255,255,0.13);
+  --text:#e8edf5;--muted:#6b7a94;--muted2:#8e9db6;
+  --green:#18e5a0;--green-bg:rgba(24,229,160,0.10);--green-dim:rgba(24,229,160,0.06);
+  --red:#ff4d6b;--red-bg:rgba(255,77,107,0.10);
+  --amber:#ffb347;--amber-bg:rgba(255,179,71,0.10);
+  --blue:#4fa3ff;--blue-bg:rgba(79,163,255,0.10);
+  --teal:#00d4c8;--teal-bg:rgba(0,212,200,0.10);
+  --mono:'JetBrains Mono',monospace;--ui:'Manrope',sans-serif;--head:'Syne',sans-serif;
+  --radius:10px;--radius-lg:14px;
+}
+html{font-size:14px}
+body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100vh;
+  background-image:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(24,229,160,0.04) 0%,transparent 60%),
+  radial-gradient(ellipse 50% 50% at 90% 100%,rgba(79,163,255,0.04) 0%,transparent 60%)}
+.container{max-width:1200px;margin:0 auto;padding:0 24px}
 
-  /* HEADER */
-  header { padding: 32px 0 20px; border-bottom: 1px solid var(--border); margin-bottom: 28px; }
-  .header-inner { display: flex; align-items: flex-end; justify-content: space-between; flex-wrap: wrap; gap: 16px; }
-  .brand h1 { font-family: var(--head); font-size: 22px; font-weight: 700; letter-spacing: -0.02em; }
-  .brand p { margin-top: 5px; font-size: 12px; color: var(--muted); font-family: var(--mono); letter-spacing: 0.04em; }
-  .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-  .status-pill {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 5px 11px;
-    border-radius: 20px;
-    font-family: var(--mono);
-    font-size: 11px;
-    border: 1px solid var(--border2);
-    color: var(--muted2);
-    background: var(--surface);
-  }
-  .status-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--muted); }
-  .status-pill.ok   { border-color: rgba(24,229,160,0.25); color: var(--green); }
-  .status-pill.ok   .status-dot { background: var(--green); box-shadow: 0 0 6px var(--green); animation: pulse 2s infinite; }
-  .status-pill.err  { border-color: rgba(255,77,107,0.25); color: var(--red); }
-  .status-pill.err  .status-dot { background: var(--red); }
-  .status-pill.busy { border-color: rgba(255,179,71,0.25); color: var(--amber); }
-  .status-pill.busy .status-dot { background: var(--amber); animation: pulse 0.8s infinite; }
-  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.3} }
-  .btn {
-    display: inline-flex; align-items: center; gap: 6px;
-    padding: 7px 14px;
-    background: transparent;
-    border: 1px solid var(--border2);
-    border-radius: var(--radius);
-    color: var(--muted2);
-    font-family: var(--ui); font-size: 12px; font-weight: 500;
-    cursor: pointer; transition: all 0.15s;
-  }
-  .btn:hover { border-color: rgba(255,255,255,0.25); color: var(--text); background: rgba(255,255,255,0.04); }
-  .btn:active { transform: scale(0.98); }
-  .btn svg { width: 13px; height: 13px; }
-  .btn.primary { background: var(--green); color: #040a10; border-color: transparent; font-weight: 600; }
-  .btn.primary:hover { background: #22f0aa; }
-  #refreshBtn svg { transition: transform 0.5s; }
-  #refreshBtn.spinning svg { transform: rotate(360deg); }
+/* ── PASSWORD OVERLAY ─────────────────────────────────────────── */
+#pwOverlay{
+  position:fixed;inset:0;z-index:1000;
+  background:var(--bg);
+  background-image:radial-gradient(ellipse 60% 40% at 10% 0%,rgba(24,229,160,0.05) 0%,transparent 60%),
+    radial-gradient(ellipse 50% 50% at 90% 100%,rgba(79,163,255,0.05) 0%,transparent 60%);
+  display:flex;align-items:center;justify-content:center;
+}
+#pwCard{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:18px;padding:44px 40px;width:370px;max-width:92vw;text-align:center;
+}
+.pw-logo{font-family:var(--head);font-size:24px;font-weight:700;letter-spacing:-0.02em}
+.pw-sub{font-family:var(--mono);font-size:11px;color:var(--muted);letter-spacing:0.05em;margin-top:5px;margin-bottom:34px}
+.pw-label{text-align:left;font-size:11px;color:var(--muted);text-transform:uppercase;letter-spacing:0.05em;margin-bottom:6px}
+.pw-input-wrap{
+  display:flex;align-items:center;
+  background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);
+  overflow:hidden;margin-bottom:10px;transition:border-color 0.15s,box-shadow 0.15s;
+}
+.pw-input-wrap:focus-within{border-color:rgba(24,229,160,0.5);box-shadow:0 0 0 3px rgba(24,229,160,0.08)}
+#pwInput{flex:1;background:transparent;border:none;outline:none;padding:11px 14px;
+  color:var(--text);font-family:var(--mono);font-size:14px}
+#pwInput::placeholder{color:var(--muted)}
+.eye-btn{background:transparent;border:none;cursor:pointer;padding:0 12px;color:var(--muted);
+  display:flex;align-items:center;transition:color 0.15s}
+.eye-btn:hover{color:var(--text)}
+.eye-btn svg{width:15px;height:15px}
+#pwError{font-size:12px;color:var(--red);font-family:var(--mono);min-height:18px;margin-bottom:12px;text-align:left}
+#pwUnlockBtn{width:100%;padding:11px;font-size:14px;font-weight:600;border-radius:var(--radius)}
+#pwUnlockBtn:disabled{opacity:0.55;cursor:not-allowed;transform:none}
+.pw-hint{font-size:11px;color:var(--muted);margin-top:22px;line-height:1.7;border-top:1px solid var(--border);padding-top:18px;text-align:left}
+.pw-hint strong{color:var(--muted2)}
 
-  /* NOTICE BANNER */
-  .notice {
-    display: flex; align-items: flex-start; gap: 10px;
-    padding: 12px 16px;
-    border-radius: var(--radius);
-    font-size: 12px; line-height: 1.6;
-    margin-bottom: 20px;
-  }
-  .notice svg { width: 14px; height: 14px; flex-shrink: 0; margin-top: 1px; }
-  .notice.warn  { background: var(--amber-bg); border: 1px solid rgba(255,179,71,0.25); color: var(--amber); }
-  .notice.info  { background: var(--blue-bg);  border: 1px solid rgba(79,163,255,0.25);  color: var(--blue); }
-  .notice a { color: inherit; text-decoration: underline; cursor: pointer; }
-  #noticeWrap { display: none; }
+/* ── MODAL ────────────────────────────────────────────────────── */
+#modalBackdrop{
+  position:fixed;inset:0;z-index:800;
+  background:rgba(0,0,0,0.65);backdrop-filter:blur(4px);
+  display:none;align-items:center;justify-content:center;
+}
+#modalBackdrop.open{display:flex}
+#modalCard{
+  background:var(--surface);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);padding:28px 30px;
+  width:540px;max-width:92vw;position:relative;
+}
+.modal-close{position:absolute;top:14px;right:18px;background:transparent;border:none;
+  cursor:pointer;color:var(--muted);font-size:22px;line-height:1;transition:color 0.15s}
+.modal-close:hover{color:var(--text)}
+.modal-title{font-family:var(--head);font-size:17px;font-weight:700;margin-bottom:7px}
+.modal-desc{font-size:12px;color:var(--muted2);line-height:1.65;margin-bottom:16px}
+.modal-textarea{
+  width:100%;height:108px;background:var(--surface2);
+  border:1px solid var(--border2);border-radius:var(--radius);
+  color:var(--text);font-family:var(--mono);font-size:11px;
+  padding:10px 12px;resize:vertical;outline:none;line-height:1.5;
+  transition:border-color 0.15s;
+}
+.modal-textarea:focus{border-color:rgba(24,229,160,0.4)}
+.modal-actions{display:flex;gap:10px;margin-top:14px;flex-wrap:wrap;align-items:center}
+.modal-warn{font-size:11px;color:var(--amber);margin-top:12px;line-height:1.65}
+.modal-warn svg{width:12px;height:12px;vertical-align:middle;margin-right:3px}
+#importErr{font-size:12px;color:var(--red);font-family:var(--mono);margin-top:8px;min-height:16px}
+#copyFeedback{font-size:12px;color:var(--green);font-family:var(--mono)}
 
-  /* SUMMARY */
-  .summary-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 12px; margin-bottom: 24px; }
-  .metric-card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 16px 18px; }
-  .metric-label { font-size: 11px; color: var(--muted); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 500; margin-bottom: 8px; }
-  .metric-value { font-family: var(--mono); font-size: 22px; font-weight: 500; }
-  .metric-value.green { color: var(--green); }
-  .metric-value.red   { color: var(--red); }
-  .metric-sub { font-size: 11px; color: var(--muted); margin-top: 5px; font-family: var(--mono); }
+/* ── HEADER ───────────────────────────────────────────────────── */
+header{padding:28px 0 18px;border-bottom:1px solid var(--border);margin-bottom:28px}
+.header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
+.brand h1{font-family:var(--head);font-size:22px;font-weight:700;letter-spacing:-0.02em}
+.brand p{margin-top:5px;font-size:12px;color:var(--muted);font-family:var(--mono);letter-spacing:0.04em}
+.header-actions{display:flex;align-items:center;gap:8px;flex-wrap:wrap}
+.status-pill{display:inline-flex;align-items:center;gap:6px;padding:5px 11px;
+  border-radius:20px;font-family:var(--mono);font-size:11px;
+  border:1px solid var(--border2);color:var(--muted2);background:var(--surface)}
+.status-dot{width:6px;height:6px;border-radius:50%;background:var(--muted)}
+.status-pill.ok{border-color:rgba(24,229,160,0.25);color:var(--green)}
+.status-pill.ok .status-dot{background:var(--green);box-shadow:0 0 6px var(--green);animation:pulse 2s infinite}
+.status-pill.err{border-color:rgba(255,77,107,0.25);color:var(--red)}
+.status-pill.err .status-dot{background:var(--red)}
+.status-pill.busy{border-color:rgba(255,179,71,0.25);color:var(--amber)}
+.status-pill.busy .status-dot{background:var(--amber);animation:pulse 0.8s infinite}
+@keyframes pulse{0%,100%{opacity:1}50%{opacity:0.3}}
 
-  /* ADD PANEL */
-  .add-panel { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); padding: 20px 22px; margin-bottom: 24px; }
-  .add-panel-title { font-family: var(--head); font-size: 12px; font-weight: 600; color: var(--muted2); letter-spacing: 0.06em; text-transform: uppercase; margin-bottom: 14px; }
-  .add-form { display: flex; gap: 10px; flex-wrap: wrap; align-items: flex-end; }
-  .field { display: flex; flex-direction: column; gap: 5px; }
-  .field label { font-size: 11px; color: var(--muted); letter-spacing: 0.04em; text-transform: uppercase; }
-  .field input {
-    background: var(--surface2); border: 1px solid var(--border2); border-radius: var(--radius);
-    padding: 8px 12px; color: var(--text); font-family: var(--mono); font-size: 13px;
-    outline: none; width: 140px; transition: border-color 0.15s;
-  }
-  .field input:focus { border-color: rgba(24,229,160,0.4); box-shadow: 0 0 0 3px rgba(24,229,160,0.08); }
-  .field input::placeholder { color: var(--muted); }
-  #addError { font-size: 12px; color: var(--red); font-family: var(--mono); margin-top: 8px; display: none; }
+.btn{display:inline-flex;align-items:center;gap:6px;padding:7px 13px;background:transparent;
+  border:1px solid var(--border2);border-radius:var(--radius);color:var(--muted2);
+  font-family:var(--ui);font-size:12px;font-weight:500;cursor:pointer;transition:all 0.15s}
+.btn:hover{border-color:rgba(255,255,255,0.25);color:var(--text);background:rgba(255,255,255,0.04)}
+.btn:active{transform:scale(0.97)}
+.btn svg{width:13px;height:13px;flex-shrink:0}
+.btn.primary{background:var(--green);color:#040a10;border-color:transparent;font-weight:600}
+.btn.primary:hover{background:#22f0aa}
+.btn.active{border-color:rgba(24,229,160,0.4);color:var(--green);background:var(--green-dim)}
+.btn.danger{color:var(--red);border-color:rgba(255,77,107,0.3)}
+.btn.danger:hover{background:var(--red-bg);border-color:rgba(255,77,107,0.5)}
+#refreshBtn svg{transition:transform 0.5s}
+#refreshBtn.spinning svg{transform:rotate(360deg)}
 
-  /* TABLE */
-  .table-wrap { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius-lg); overflow-x: auto; margin-bottom: 32px; }
-  .table-header { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px; }
-  .table-title { font-family: var(--head); font-size: 14px; font-weight: 600; }
-  .tier-legend { display: flex; gap: 14px; flex-wrap: wrap; }
-  .tier-item { display: flex; align-items: center; gap: 5px; font-size: 11px; color: var(--muted); }
-  .tier-dot  { width: 6px; height: 6px; border-radius: 50%; }
-  .btn.active { border-color: rgba(24,229,160,0.4); color: var(--green); background: var(--green-dim); }
-  .btn.active:hover { background: rgba(24,229,160,0.12); }
+/* ── NOTICE ───────────────────────────────────────────────────── */
+.notice{display:flex;align-items:flex-start;gap:10px;padding:12px 16px;border-radius:var(--radius);
+  font-size:12px;line-height:1.6;margin-bottom:20px}
+.notice svg{width:14px;height:14px;flex-shrink:0;margin-top:1px}
+.notice.warn{background:var(--amber-bg);border:1px solid rgba(255,179,71,0.25);color:var(--amber)}
+.notice a{color:inherit;text-decoration:underline;cursor:pointer}
+#noticeWrap{display:none}
 
-  table { width: 100%; border-collapse: collapse; }
-  thead th {
-    padding: 9px 12px; text-align: left;
-    font-size: 10px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase;
-    color: var(--muted); background: rgba(255,255,255,0.02); border-bottom: 1px solid var(--border);
-    white-space: nowrap;
-  }
-  thead th:first-child { padding-left: 20px; }
-  thead th:last-child  { padding-right: 20px; text-align: center; }
-  tbody tr { border-bottom: 1px solid var(--border); transition: background 0.1s; }
-  tbody tr:last-child { border-bottom: none; }
-  tbody tr:hover { background: rgba(255,255,255,0.02); }
-  td { padding: 12px 12px; font-size: 13px; vertical-align: middle; white-space: nowrap; }
-  td:first-child { padding-left: 20px; }
-  td:last-child  { padding-right: 20px; text-align: center; }
+/* ── SUMMARY ──────────────────────────────────────────────────── */
+.summary-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(160px,1fr));gap:12px;margin-bottom:24px}
+.metric-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:16px 18px}
+.metric-label{font-size:11px;color:var(--muted);letter-spacing:0.06em;text-transform:uppercase;font-weight:500;margin-bottom:8px}
+.metric-value{font-family:var(--mono);font-size:22px;font-weight:500}
+.metric-value.green{color:var(--green)}.metric-value.red{color:var(--red)}
+.metric-sub{font-size:11px;color:var(--muted);margin-top:5px;font-family:var(--mono)}
 
-  .ticker-cell { display: flex; flex-direction: column; gap: 2px; }
-  .ticker-sym  { font-family: var(--mono); font-weight: 500; font-size: 14px; }
-  .ticker-name { font-size: 11px; color: var(--muted); max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
+/* ── ADD PANEL ────────────────────────────────────────────────── */
+.add-panel{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:24px}
+.add-panel-title{font-family:var(--head);font-size:12px;font-weight:600;color:var(--muted2);letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px}
+.add-form{display:flex;gap:10px;flex-wrap:wrap;align-items:flex-end}
+.field{display:flex;flex-direction:column;gap:5px}
+.field label{font-size:11px;color:var(--muted);letter-spacing:0.04em;text-transform:uppercase}
+.field input{background:var(--surface2);border:1px solid var(--border2);border-radius:var(--radius);
+  padding:8px 12px;color:var(--text);font-family:var(--mono);font-size:13px;
+  outline:none;width:140px;transition:border-color 0.15s}
+.field input:focus{border-color:rgba(24,229,160,0.4);box-shadow:0 0 0 3px rgba(24,229,160,0.08)}
+.field input::placeholder{color:var(--muted)}
+#addError{font-size:12px;color:var(--red);font-family:var(--mono);margin-top:8px;display:none}
 
-  .mono { font-family: var(--mono); }
+/* ── TABLE ────────────────────────────────────────────────────── */
+.table-wrap{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);overflow-x:auto;margin-bottom:32px}
+.table-header{display:flex;align-items:center;justify-content:space-between;padding:14px 20px;border-bottom:1px solid var(--border);flex-wrap:wrap;gap:10px}
+.table-title{font-family:var(--head);font-size:14px;font-weight:600}
+.tier-legend{display:flex;gap:14px;flex-wrap:wrap}
+.tier-item{display:flex;align-items:center;gap:5px;font-size:11px;color:var(--muted)}
+.tier-dot{width:6px;height:6px;border-radius:50%}
 
-  /* Inline editable price */
-  .price-display {
-    display: inline-flex; align-items: center; gap: 6px;
-    font-family: var(--mono); font-size: 13px; font-weight: 500;
-  }
-  .edit-icon {
-    width: 13px; height: 13px; opacity: 0; cursor: pointer; transition: opacity 0.15s; flex-shrink: 0;
-    color: var(--muted);
-  }
-  tr:hover .edit-icon { opacity: 1; }
-  .price-input-wrap { display: none; align-items: center; gap: 6px; }
-  .price-input-wrap input {
-    background: var(--surface2); border: 1px solid rgba(24,229,160,0.4);
-    border-radius: 6px; padding: 4px 8px;
-    color: var(--text); font-family: var(--mono); font-size: 13px;
-    outline: none; width: 90px;
-    box-shadow: 0 0 0 3px rgba(24,229,160,0.08);
-  }
-  .price-ok-btn, .price-cancel-btn {
-    width: 22px; height: 22px; border-radius: 5px; border: none;
-    display: inline-flex; align-items: center; justify-content: center;
-    cursor: pointer; font-size: 11px; transition: all 0.12s;
-  }
-  .price-ok-btn     { background: var(--green-bg); color: var(--green); }
-  .price-ok-btn:hover { background: rgba(24,229,160,0.2); }
-  .price-cancel-btn { background: rgba(255,255,255,0.05); color: var(--muted); }
-  .price-cancel-btn:hover { background: rgba(255,255,255,0.1); }
-  .price-loading { color: var(--muted); font-family: var(--mono); font-size: 11px; animation: blink 1.2s infinite; }
-  @keyframes blink { 0%,100%{opacity:0.4} 50%{opacity:1} }
+table{width:100%;border-collapse:collapse}
+thead th{padding:9px 12px;text-align:left;font-size:10px;font-weight:600;letter-spacing:0.08em;
+  text-transform:uppercase;color:var(--muted);background:rgba(255,255,255,0.02);
+  border-bottom:1px solid var(--border);white-space:nowrap}
+thead th:first-child{padding-left:20px}
+thead th:last-child{padding-right:20px;text-align:center}
+tbody tr{border-bottom:1px solid var(--border);transition:background 0.1s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:rgba(255,255,255,0.02)}
+td{padding:12px 12px;font-size:13px;vertical-align:middle;white-space:nowrap}
+td:first-child{padding-left:20px}
+td:last-child{padding-right:20px;text-align:center}
 
-  .gain-cell { display: flex; flex-direction: column; gap: 3px; }
-  .gain-pct  { font-family: var(--mono); font-weight: 500; }
-  .gain-pct.pos { color: var(--green); }
-  .gain-pct.neg { color: var(--red); }
-  .gain-bar-wrap { width: 52px; height: 3px; background: rgba(255,255,255,0.08); border-radius: 2px; overflow: hidden; }
-  .gain-bar { height: 100%; border-radius: 2px; transition: width 0.5s; }
-  .gain-bar.pos { background: var(--green); }
-  .gain-bar.neg { background: var(--red); }
+.ticker-cell{display:flex;flex-direction:column;gap:2px}
+.ticker-sym{font-family:var(--mono);font-weight:500;font-size:14px}
+.ticker-name{font-size:11px;color:var(--muted);max-width:120px;overflow:hidden;text-overflow:ellipsis}
+.mono{font-family:var(--mono)}
 
-  .tier-badge {
-    display: inline-flex; align-items: center;
-    padding: 3px 9px; border-radius: 20px;
-    font-size: 11px; font-weight: 600; letter-spacing: 0.03em; font-family: var(--mono);
-  }
-  .tier-1 { background: var(--green-dim); color: var(--green); border: 1px solid rgba(24,229,160,0.2); }
-  .tier-2 { background: var(--teal-bg);   color: var(--teal);  border: 1px solid rgba(0,212,200,0.2); }
-  .tier-3 { background: var(--blue-bg);   color: var(--blue);  border: 1px solid rgba(79,163,255,0.2); }
-  .tier-4 { background: var(--amber-bg);  color: var(--amber); border: 1px solid rgba(255,179,71,0.2); }
-  .tier-w { background: var(--red-bg);    color: var(--red);   border: 1px solid rgba(255,77,107,0.2); }
-  .tier-na{ background: rgba(255,255,255,0.04); color: var(--muted); border: 1px solid var(--border); }
+/* inline price edit */
+.price-display{display:inline-flex;align-items:center;gap:6px;font-family:var(--mono);font-size:13px;font-weight:500}
+.edit-icon{width:13px;height:13px;opacity:0;cursor:pointer;transition:opacity 0.15s;flex-shrink:0;color:var(--muted)}
+tr:hover .edit-icon{opacity:1}
+.price-input-wrap{display:none;align-items:center;gap:6px}
+.price-input-wrap input{background:var(--surface2);border:1px solid rgba(24,229,160,0.4);
+  border-radius:6px;padding:4px 8px;color:var(--text);font-family:var(--mono);font-size:13px;
+  outline:none;width:90px;box-shadow:0 0 0 3px rgba(24,229,160,0.08)}
+.price-ok-btn,.price-cancel-btn{width:22px;height:22px;border-radius:5px;border:none;
+  display:inline-flex;align-items:center;justify-content:center;cursor:pointer;font-size:11px;transition:all 0.12s}
+.price-ok-btn{background:var(--green-bg);color:var(--green)}
+.price-ok-btn:hover{background:rgba(24,229,160,0.2)}
+.price-cancel-btn{background:rgba(255,255,255,0.05);color:var(--muted)}
+.price-cancel-btn:hover{background:rgba(255,255,255,0.1)}
+.price-loading{color:var(--muted);font-family:var(--mono);font-size:11px;animation:blink 1.2s infinite}
+@keyframes blink{0%,100%{opacity:0.4}50%{opacity:1}}
 
-  .stop-cell  { display: flex; flex-direction: column; gap: 2px; }
-  .stop-price { font-family: var(--mono); font-size: 13px; font-weight: 500; }
-  .stop-trail { font-size: 11px; color: var(--muted); font-family: var(--mono); }
-  .protected     { font-family: var(--mono); font-size: 12px; }
-  .protected.pos { color: var(--green); }
-  .protected.neg { color: var(--red); }
-  .protected.na  { color: var(--muted); }
+.gain-cell{display:flex;flex-direction:column;gap:3px}
+.gain-pct{font-family:var(--mono);font-weight:500}
+.gain-pct.pos{color:var(--green)}.gain-pct.neg{color:var(--red)}
+.gain-bar-wrap{width:52px;height:3px;background:rgba(255,255,255,0.08);border-radius:2px;overflow:hidden}
+.gain-bar{height:100%;border-radius:2px;transition:width 0.5s}
+.gain-bar.pos{background:var(--green)}.gain-bar.neg{background:var(--red)}
 
-  .delete-btn {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 28px; height: 28px;
-    background: transparent; border: 1px solid transparent; border-radius: 6px;
-    cursor: pointer; color: var(--muted); transition: all 0.15s;
-  }
-  .delete-btn:hover { background: var(--red-bg); border-color: rgba(255,77,107,0.3); color: var(--red); }
-  .delete-btn svg { width: 13px; height: 13px; }
+.tier-badge{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;
+  font-size:11px;font-weight:600;letter-spacing:0.03em;font-family:var(--mono)}
+.tier-1{background:var(--green-dim);color:var(--green);border:1px solid rgba(24,229,160,0.2)}
+.tier-2{background:var(--teal-bg);color:var(--teal);border:1px solid rgba(0,212,200,0.2)}
+.tier-3{background:var(--blue-bg);color:var(--blue);border:1px solid rgba(79,163,255,0.2)}
+.tier-4{background:var(--amber-bg);color:var(--amber);border:1px solid rgba(255,179,71,0.2)}
+.tier-w{background:var(--red-bg);color:var(--red);border:1px solid rgba(255,77,107,0.2)}
+.tier-na{background:rgba(255,255,255,0.04);color:var(--muted);border:1px solid var(--border)}
 
-  .empty-state { text-align: center; padding: 48px 24px; color: var(--muted); font-size: 13px; }
+.stop-cell{display:flex;flex-direction:column;gap:2px}
+.stop-price{font-family:var(--mono);font-size:13px;font-weight:500}
+.stop-trail{font-size:11px;color:var(--muted);font-family:var(--mono)}
+.protected{font-family:var(--mono);font-size:12px}
+.protected.pos{color:var(--green)}.protected.neg{color:var(--red)}.protected.na{color:var(--muted)}
 
-  /* TOOLTIP */
-  .th-tooltip-wrap { position: relative; display: inline-flex; align-items: center; gap: 5px; }
-  .th-info {
-    display: inline-flex; align-items: center; justify-content: center;
-    width: 14px; height: 14px; border-radius: 50%;
-    border: 1px solid var(--muted); color: var(--muted);
-    font-size: 9px; font-weight: 700; cursor: default;
-    flex-shrink: 0; font-family: var(--ui); line-height: 1;
-    transition: border-color 0.15s, color 0.15s;
-  }
-  .th-tooltip-wrap:hover .th-info { border-color: var(--blue); color: var(--blue); }
-  .th-tooltip {
-    display: none;
-    position: absolute; top: calc(100% + 8px); right: 0;
-    width: 300px;
-    background: #1a2740;
-    border: 1px solid rgba(79,163,255,0.25);
-    border-radius: var(--radius);
-    padding: 13px 15px;
-    font-size: 11.5px; line-height: 1.65;
-    color: var(--muted2);
-    z-index: 100;
-    box-shadow: 0 8px 32px rgba(0,0,0,0.5);
-    text-transform: none; letter-spacing: 0; font-weight: 400;
-    font-family: var(--ui);
-    white-space: normal;
-  }
-  .th-tooltip strong { color: var(--text); font-weight: 600; }
-  .th-tooltip code {
-    background: rgba(79,163,255,0.12); color: var(--blue);
-    padding: 1px 5px; border-radius: 4px; font-family: var(--mono); font-size: 11px;
-  }
-  .th-tooltip .tt-divider { border: none; border-top: 1px solid var(--border); margin: 8px 0; }
-  .th-tooltip .tt-warn { color: var(--amber); font-size: 11px; margin-top: 6px; }
-  .th-tooltip-wrap:hover .th-tooltip { display: block; }
+/* buyback */
+.buyback-cell{display:flex;flex-direction:column;gap:4px}
+.bb-row{display:flex;align-items:baseline;gap:6px}
+.bb-label{font-size:10.5px;color:var(--muted);font-family:var(--mono);white-space:nowrap}
+.bb-value{font-family:var(--mono);font-size:12.5px;font-weight:500;color:var(--blue);white-space:nowrap}
+.bb-limit{color:var(--teal)}
 
-  /* BUYBACK CELL */
-  .buyback-cell { display: flex; flex-direction: column; gap: 4px; }
-  .bb-row { display: flex; align-items: baseline; gap: 6px; }
-  .bb-label { font-size: 10.5px; color: var(--muted); font-family: var(--mono); white-space: nowrap; }
-  .bb-value { font-family: var(--mono); font-size: 12.5px; font-weight: 500; color: var(--blue); white-space: nowrap; }
-  .bb-limit { color: var(--teal); }
+/* tooltip */
+.th-tooltip-wrap{position:relative;display:inline-flex;align-items:center;gap:5px}
+.th-info{display:inline-flex;align-items:center;justify-content:center;width:14px;height:14px;
+  border-radius:50%;border:1px solid var(--muted);color:var(--muted);font-size:9px;font-weight:700;
+  cursor:default;flex-shrink:0;font-family:var(--ui);line-height:1;transition:border-color 0.15s,color 0.15s}
+.th-tooltip-wrap:hover .th-info{border-color:var(--blue);color:var(--blue)}
+.th-tooltip{display:none;position:absolute;top:calc(100% + 8px);right:0;width:290px;
+  background:#1a2740;border:1px solid rgba(79,163,255,0.25);border-radius:var(--radius);
+  padding:13px 15px;font-size:11.5px;line-height:1.65;color:var(--muted2);z-index:100;
+  box-shadow:0 8px 32px rgba(0,0,0,0.5);text-transform:none;letter-spacing:0;
+  font-weight:400;font-family:var(--ui);white-space:normal}
+.th-tooltip strong{color:var(--text);font-weight:600}
+.th-tooltip code{background:rgba(79,163,255,0.12);color:var(--blue);padding:1px 5px;border-radius:4px;font-family:var(--mono);font-size:11px}
+.th-tooltip .tt-divider{border:none;border-top:1px solid var(--border);margin:8px 0}
+.th-tooltip .tt-warn{color:var(--amber);font-size:11px;margin-top:6px}
+.th-tooltip-wrap:hover .th-tooltip{display:block}
 
-  footer { border-top: 1px solid var(--border); padding: 18px 0; text-align: center; font-size: 11px; color: var(--muted); font-family: var(--mono); line-height: 1.7; }
-  footer a { color: var(--muted2); text-decoration: none; }
-  footer a:hover { color: var(--text); }
+.delete-btn{display:inline-flex;align-items:center;justify-content:center;width:28px;height:28px;
+  background:transparent;border:1px solid transparent;border-radius:6px;cursor:pointer;
+  color:var(--muted);transition:all 0.15s}
+.delete-btn:hover{background:var(--red-bg);border-color:rgba(255,77,107,0.3);color:var(--red)}
+.delete-btn svg{width:13px;height:13px}
+.empty-state{text-align:center;padding:48px 24px;color:var(--muted);font-size:13px}
 
-  @media (max-width: 800px) {
-    .tier-legend { display: none; }
-    td, th { padding: 9px 8px; }
-    td:first-child, thead th:first-child { padding-left: 14px; }
-    .ticker-name { display: none; }
-    .field input { width: 115px; }
-  }
-  @keyframes fadeSlideIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
-  tbody tr { animation: fadeSlideIn 0.2s ease both; }
+footer{border-top:1px solid var(--border);padding:18px 0;text-align:center;
+  font-size:11px;color:var(--muted);font-family:var(--mono);line-height:1.7}
+footer a{color:var(--muted2);text-decoration:none}
+footer a:hover{color:var(--text)}
+
+@media(max-width:800px){
+  .tier-legend{display:none}
+  td,th{padding:9px 8px}
+  td:first-child,thead th:first-child{padding-left:14px}
+  .ticker-name{display:none}
+  .field input{width:115px}
+}
+@keyframes fadeSlideIn{from{opacity:0;transform:translateY(5px)}to{opacity:1;transform:translateY(0)}}
+tbody tr{animation:fadeSlideIn 0.2s ease both}
 </style>
 </head>
 <body>
-<div class="container">
+
+<!-- ═══ PASSWORD OVERLAY ══════════════════════════════════════════════════════ -->
+<div id="pwOverlay">
+  <div id="pwCard">
+    <div class="pw-logo">Portfolio Stops</div>
+    <div class="pw-sub">trailing stop dashboard · encrypted</div>
+    <div class="pw-label">Password</div>
+    <div class="pw-input-wrap">
+      <input type="password" id="pwInput" placeholder="Enter your password" autocomplete="current-password"/>
+      <button class="eye-btn" onclick="togglePwVis()" type="button" title="Show/hide password">
+        <svg id="eyeIcon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+          <path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>
+        </svg>
+      </button>
+    </div>
+    <div id="pwError"></div>
+    <button class="btn primary" id="pwUnlockBtn" onclick="unlock()">
+      <span class="pw-text">Unlock</span>
+      <span class="pw-spinner">Decrypting…</span>
+    </button>
+    <div class="pw-hint">
+      <strong>First visit?</strong> Set any password — your portfolio will be encrypted with it and stored only on this device.<br/><br/>
+      To access from another device, use <strong>Export</strong> (after unlocking) to copy your encrypted data, then <strong>Import</strong> on the new device.
+    </div>
+  </div>
+</div>
+
+<!-- ═══ EXPORT / IMPORT MODAL ════════════════════════════════════════════════ -->
+<div id="modalBackdrop" onclick="closeModalOutside(event)">
+  <div id="modalCard">
+    <button class="modal-close" onclick="closeModal()">×</button>
+    <div id="exportView" style="display:none">
+      <div class="modal-title">Export Portfolio</div>
+      <div class="modal-desc">Copy the encrypted string below. On your other device, open this page, unlock with the <strong>same password</strong>, then click Import and paste it in.</div>
+      <textarea class="modal-textarea" id="exportText" readonly></textarea>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="copyExport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>
+          Copy to clipboard
+        </button>
+        <span id="copyFeedback">✓ Copied!</span>
+      </div>
+      <div class="modal-warn">⚠ This string is encrypted — it cannot be read without your password. Keep your password safe; there is no recovery option.</div>
+    </div>
+    <div id="importView" style="display:none">
+      <div class="modal-title">Import Portfolio</div>
+      <div class="modal-desc">Paste your export string below. The <strong>same password</strong> used when exporting must be active. This will <strong>replace</strong> your current portfolio on this device.</div>
+      <textarea class="modal-textarea" id="importText" placeholder="Paste export string here…"></textarea>
+      <div id="importErr"></div>
+      <div class="modal-actions">
+        <button class="btn primary" onclick="doImport()">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Import & replace
+        </button>
+        <button class="btn" onclick="closeModal()">Cancel</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ═══ MAIN APP ══════════════════════════════════════════════════════════════ -->
+<div class="container" id="appWrap" style="display:none">
 
   <header>
     <div class="header-inner">
@@ -297,6 +336,18 @@
         <p>trailing stop dashboard · live prices</p>
       </div>
       <div class="header-actions">
+        <button class="btn" onclick="showImportModal()" title="Import portfolio from another device">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
+          Import
+        </button>
+        <button class="btn" onclick="showExportModal()" title="Export portfolio for another device">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="17 8 12 3 7 8"/><line x1="12" y1="3" x2="12" y2="15"/></svg>
+          Export
+        </button>
+        <button class="btn danger" onclick="lockApp()" title="Lock and return to password screen">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          Lock
+        </button>
         <div class="status-pill busy" id="statusPill">
           <div class="status-dot"></div>
           <span id="statusText">fetching…</span>
@@ -326,9 +377,9 @@
   <div class="add-panel">
     <div class="add-panel-title">Add position</div>
     <div class="add-form">
-      <div class="field"><label>Ticker</label><input type="text" id="inTicker" placeholder="e.g. AAPL" maxlength="12" autocomplete="off" /></div>
-      <div class="field"><label>Buy price (USD)</label><input type="number" id="inBuy" placeholder="150.00" step="0.01" min="0" /></div>
-      <div class="field"><label>Trail % override</label><input type="number" id="inTrail" placeholder="auto (tiered)" step="0.1" min="1" max="50" /></div>
+      <div class="field"><label>Ticker</label><input type="text" id="inTicker" placeholder="e.g. AAPL" maxlength="12" autocomplete="off"/></div>
+      <div class="field"><label>Buy price (USD)</label><input type="number" id="inBuy" placeholder="150.00" step="0.01" min="0"/></div>
+      <div class="field"><label>Trail % override</label><input type="number" id="inTrail" placeholder="auto (tiered)" step="0.1" min="1" max="50"/></div>
       <button class="btn primary" onclick="addStock()">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
         Add
@@ -339,7 +390,7 @@
 
   <div class="table-wrap">
     <div class="table-header">
-      <div style="display:flex;align-items:center;gap:10px;">
+      <div style="display:flex;align-items:center;gap:10px">
         <div class="table-title">Positions</div>
         <button class="btn" id="sortBtn" onclick="toggleSort()" title="Sort tickers A→Z / Z→A">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M7 12h10M11 18h2"/></svg>
@@ -355,29 +406,22 @@
     </div>
     <table>
       <thead><tr>
-        <th><span id="thTicker">Ticker <span id="sortArrow" style="opacity:0">↑</span></span></th>
-        <th>Buy price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ click to edit</span></th>
-        <th>Current price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ click to edit</span></th>
+        <th><span>Ticker <span id="sortArrow" style="opacity:0">↑</span></span></th>
+        <th>Buy price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ edit</span></th>
+        <th>Current price <span style="font-weight:400;opacity:0.6;font-size:9px">✎ edit</span></th>
         <th>Gain / Loss</th>
         <th>Tier</th>
         <th>Stop price</th>
         <th>Gain protected</th>
         <th>
-          <div class="th-tooltip-wrap">
-            Buyback target
-            <span class="th-info">i</span>
+          <div class="th-tooltip-wrap">Buyback target <span class="th-info">i</span>
             <div class="th-tooltip">
-              <strong>Recommended re-entry after stop triggers</strong><br/>
-              Set this as a conditional order in your broker <em>after</em> the trailing stop fires:<br/><br/>
-              <strong>Trigger (X):</strong> the buyback price shown<br/>
-              <strong>Limit (Y):</strong> X × 1.01 (1% above trigger)<br/><br/>
-              <em>"When price arrives at X, buy limit at Y"</em>
-              <hr class="tt-divider"/>
+              <strong>Re-entry after stop triggers</strong><br/>Place this conditional order in your broker after your trailing stop fires:<br/><br/>
+              <em>"When price arrives at X, buy limit at Y"</em><br/><br/>
               <strong>Formula:</strong> <code>stop × (1 − trail÷2%)</code><br/>
-              If trail = 8% → buy 4% below the stop.<br/>
-              Assumes further downside after exit; re-enters in the flush zone where selling exhausts.
+              Buys into the flush zone below the stop.
               <hr class="tt-divider"/>
-              <div class="tt-warn">⚠ Check wash-sale rules in your jurisdiction before buying back within 30 days of exit.</div>
+              <div class="tt-warn">⚠ Check wash-sale rules before buying back within 30 days.</div>
             </div>
           </div>
         </th>
@@ -388,321 +432,362 @@
   </div>
 
   <footer>
-    Prices via Yahoo Finance (multiple endpoints) · data may be delayed 15 min · for informational use only<br/>
-    Click any buy or current price to edit manually &nbsp;·&nbsp; <a href="https://finance.yahoo.com" target="_blank">finance.yahoo.com</a>
+    Prices via Yahoo Finance · delayed ~15 min · informational use only<br/>
+    Click any price cell to edit manually &nbsp;·&nbsp; <a href="https://finance.yahoo.com" target="_blank">finance.yahoo.com</a>
   </footer>
 </div>
 
 <script>
-// ─── DEFAULTS ─────────────────────────────────────────────────────────────────
+// ── DEFAULTS ──────────────────────────────────────────────────────────────────
 const DEFAULTS = [
-  {ticker:'ALAB', buy:193.70, trail:null},
-  {ticker:'CLSK', buy:13.02,  trail:null},
-  {ticker:'EOSE', buy:8.06,   trail:null},
-  {ticker:'INFQ', buy:14.78,  trail:null},
-  {ticker:'MRVL', buy:160.46, trail:null},
-  {ticker:'MSFT', buy:409.69, trail:null},
-  {ticker:'NVDA', buy:229.05, trail:null},
-  {ticker:'RIOT', buy:24.18,  trail:null},
-  {ticker:'SATS', buy:123.37, trail:null},
+  {ticker:'ALAB',buy:193.70,trail:null},{ticker:'CLSK',buy:13.02,trail:null},
+  {ticker:'EOSE',buy:8.06,trail:null},{ticker:'INFQ',buy:14.78,trail:null},
+  {ticker:'MRVL',buy:160.46,trail:null},{ticker:'MSFT',buy:409.69,trail:null},
+  {ticker:'NVDA',buy:229.05,trail:null},{ticker:'RIOT',buy:24.18,trail:null},
+  {ticker:'SATS',buy:123.37,trail:null},
 ];
 
-// ─── STATE ────────────────────────────────────────────────────────────────────
-let portfolio = [];
-let sortState = 'none'; // 'none' | 'asc' | 'desc'
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let portfolio    = [];
+let sortState    = 'none';
+let sessionKey   = null;   // CryptoKey — in memory only, cleared on reload
+let sessionPw    = null;   // password  — in memory only, cleared on reload
 
-function loadPortfolio() {
-  try {
-    const s = localStorage.getItem('portStops_v3');
-    portfolio = s ? JSON.parse(s) : DEFAULTS.map(d => ({...d, curPrice:null, name:''}));
-  } catch {
-    portfolio = DEFAULTS.map(d => ({...d, curPrice:null, name:''}));
+const SALT_KEY = 'portStops_salt';
+const DATA_KEY = 'portStops_enc_v1';
+
+// ── CRYPTO ────────────────────────────────────────────────────────────────────
+function u8ToB64(arr) { return btoa(Array.from(arr, b => String.fromCharCode(b)).join('')) }
+function b64ToU8(b64) { return Uint8Array.from(atob(b64), c => c.charCodeAt(0)) }
+
+async function deriveKey(password, salt) {
+  const raw = await crypto.subtle.importKey(
+    'raw', new TextEncoder().encode(password), {name:'PBKDF2'}, false, ['deriveKey']
+  );
+  return crypto.subtle.deriveKey(
+    {name:'PBKDF2', salt, iterations:150000, hash:'SHA-256'},
+    raw, {name:'AES-GCM', length:256}, false, ['encrypt','decrypt']
+  );
+}
+
+async function aesEncrypt(obj, key) {
+  const iv  = crypto.getRandomValues(new Uint8Array(12));
+  const ct  = await crypto.subtle.encrypt(
+    {name:'AES-GCM', iv}, key, new TextEncoder().encode(JSON.stringify(obj))
+  );
+  const buf = new Uint8Array(12 + ct.byteLength);
+  buf.set(iv); buf.set(new Uint8Array(ct), 12);
+  return u8ToB64(buf);
+}
+
+async function aesDecrypt(b64, key) {
+  const buf = b64ToU8(b64);
+  const pt  = await crypto.subtle.decrypt(
+    {name:'AES-GCM', iv:buf.slice(0,12)}, key, buf.slice(12)
+  );
+  return JSON.parse(new TextDecoder().decode(pt));
+}
+
+function getOrCreateSalt() {
+  let s = localStorage.getItem(SALT_KEY);
+  if (!s) {
+    s = u8ToB64(crypto.getRandomValues(new Uint8Array(16)));
+    localStorage.setItem(SALT_KEY, s);
+  }
+  return b64ToU8(s);
+}
+
+// ── SAVE / LOAD ───────────────────────────────────────────────────────────────
+async function save() {
+  if (!sessionKey) return;
+  const enc = await aesEncrypt(portfolio, sessionKey);
+  localStorage.setItem(DATA_KEY, enc);
+}
+
+// ── PASSWORD OVERLAY ──────────────────────────────────────────────────────────
+function togglePwVis() {
+  const inp = document.getElementById('pwInput');
+  const ico = document.getElementById('eyeIcon');
+  if (inp.type === 'password') {
+    inp.type = 'text';
+    ico.innerHTML = '<path d="M17.94 17.94A10.07 10.07 0 0 1 12 20c-7 0-11-8-11-8a18.45 18.45 0 0 1 5.06-5.94"/><path d="M9.9 4.24A9.12 9.12 0 0 1 12 4c7 0 11 8 11 8a18.5 18.5 0 0 1-2.16 3.19"/><line x1="1" y1="1" x2="23" y2="23"/>';
+  } else {
+    inp.type = 'password';
+    ico.innerHTML = '<path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"/><circle cx="12" cy="12" r="3"/>';
   }
 }
-function save() { localStorage.setItem('portStops_v3', JSON.stringify(portfolio)); }
 
-// ─── FETCHING: multi-endpoint, multi-proxy ────────────────────────────────────
+function pwErr(msg) { document.getElementById('pwError').textContent = msg; }
+function setPwBusy(b) {
+  const btn = document.getElementById('pwUnlockBtn');
+  btn.disabled = b;
+  btn.classList.toggle('busy', b);
+}
+
+async function unlock() {
+  const pw = document.getElementById('pwInput').value;
+  if (!pw) { pwErr('Enter a password.'); return; }
+  pwErr(''); setPwBusy(true);
+  try {
+    const salt = getOrCreateSalt();
+    const key  = await deriveKey(pw, salt);
+    const stored = localStorage.getItem(DATA_KEY);
+    if (stored) {
+      try { portfolio = await aesDecrypt(stored, key); }
+      catch { pwErr('Wrong password — try again.'); setPwBusy(false); return; }
+    } else {
+      portfolio = DEFAULTS.map(d => ({...d, curPrice:null, name:''}));
+    }
+    sessionKey = key;
+    sessionPw  = pw;
+    document.getElementById('pwOverlay').style.display = 'none';
+    document.getElementById('appWrap').style.display   = 'block';
+    renderTable(); renderSummary(); refreshPrices();
+  } catch(e) { pwErr('Error: ' + e.message); setPwBusy(false); }
+}
+
+function lockApp() {
+  sessionKey = null; sessionPw = null;
+  document.getElementById('appWrap').style.display   = 'none';
+  document.getElementById('pwOverlay').style.display = 'flex';
+  document.getElementById('pwInput').value = '';
+  document.getElementById('pwError').textContent = '';
+  setPwBusy(false);
+}
+
+// ── EXPORT / IMPORT ───────────────────────────────────────────────────────────
+async function showExportModal() {
+  if (!sessionPw) return;
+  // Fresh salt per export → different ciphertext each time
+  const salt   = crypto.getRandomValues(new Uint8Array(16));
+  const expKey = await deriveKey(sessionPw, salt);
+  const enc    = await aesEncrypt(portfolio, expKey);
+  const blob   = btoa(JSON.stringify({v:1, s:u8ToB64(salt), d:enc}));
+  document.getElementById('exportText').value = blob;
+  document.getElementById('copyFeedback').style.display = 'none';
+  document.getElementById('exportView').style.display = 'block';
+  document.getElementById('importView').style.display = 'none';
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+function showImportModal() {
+  document.getElementById('importText').value = '';
+  document.getElementById('importErr').textContent = '';
+  document.getElementById('importView').style.display = 'block';
+  document.getElementById('exportView').style.display = 'none';
+  document.getElementById('modalBackdrop').classList.add('open');
+}
+
+async function copyExport() {
+  const txt = document.getElementById('exportText').value;
+  try {
+    await navigator.clipboard.writeText(txt);
+    const fb = document.getElementById('copyFeedback');
+    fb.style.display = 'inline';
+    setTimeout(() => { fb.style.display = 'none'; }, 2500);
+  } catch { document.getElementById('exportText').select(); document.execCommand('copy'); }
+}
+
+async function doImport() {
+  const raw = document.getElementById('importText').value.trim();
+  const err = document.getElementById('importErr');
+  err.textContent = '';
+  if (!raw) { err.textContent = 'Paste your export string first.'; return; }
+  if (!sessionPw) { err.textContent = 'Session expired — lock and unlock first.'; return; }
+  try {
+    const {v, s, d} = JSON.parse(atob(raw));
+    if (v !== 1) throw new Error('Unrecognised format version.');
+    const salt   = b64ToU8(s);
+    const impKey = await deriveKey(sessionPw, salt);
+    const data   = await aesDecrypt(d, impKey);
+    portfolio    = data;
+    sessionKey   = await deriveKey(sessionPw, getOrCreateSalt());
+    await save();
+    closeModal();
+    renderTable(); renderSummary(); refreshPrices();
+  } catch(e) {
+    err.textContent = 'Import failed — wrong password or corrupted string. (' + e.message + ')';
+  }
+}
+
+function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); }
+function closeModalOutside(e) { if (e.target === document.getElementById('modalBackdrop')) closeModal(); }
+
+// ── FETCHING ──────────────────────────────────────────────────────────────────
 const PROXIES = [
   u => u,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
   u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
 ];
-
-async function tryFetch(url, timeoutMs = 6000) {
-  for (const proxy of PROXIES) {
-    const proxied = proxy(url);
+async function tryFetch(url, ms=6000) {
+  for (const px of PROXIES) {
     try {
       const ctrl = new AbortController();
-      const tid  = setTimeout(() => ctrl.abort(), timeoutMs);
-      const r = await fetch(proxied, {signal: ctrl.signal, headers:{Accept:'application/json'}});
+      const tid  = setTimeout(() => ctrl.abort(), ms);
+      const r    = await fetch(px(url), {signal:ctrl.signal, headers:{Accept:'application/json'}});
       clearTimeout(tid);
       if (!r.ok) continue;
-      const text = await r.text();
-      if (!text || text.trim()[0] !== '{') continue;
-      return JSON.parse(text);
-    } catch { /* next proxy */ }
+      const txt = await r.text();
+      if (!txt || txt.trim()[0] !== '{') continue;
+      return JSON.parse(txt);
+    } catch { /* next */ }
   }
   return null;
 }
-
-// Try Yahoo Finance v7 batch quote (fastest, all symbols at once)
-async function fetchV7Batch(symbols) {
-  const endpoints = [
-    `https://query1.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(',')}`,
-    `https://query2.finance.yahoo.com/v7/finance/quote?symbols=${symbols.join(',')}`,
-  ];
-  for (const url of endpoints) {
-    const d = await tryFetch(url);
-    const res = d?.quoteResponse?.result;
-    if (res && res.length > 0) return res;
+async function fetchV7Batch(syms) {
+  for (const base of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
+    const d = await tryFetch(`${base}/v7/finance/quote?symbols=${syms.join(',')}`);
+    const r = d?.quoteResponse?.result;
+    if (r?.length) return r;
   }
   return null;
 }
-
-// Fallback: Yahoo Finance v8 chart per symbol (slower but different CORS path)
-async function fetchV8Single(symbol) {
-  const endpoints = [
-    `https://query1.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`,
-    `https://query2.finance.yahoo.com/v8/finance/chart/${symbol}?interval=1d&range=5d`,
-  ];
-  for (const url of endpoints) {
-    const d = await tryFetch(url, 8000);
+async function fetchV8Single(sym) {
+  for (const base of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
+    const d    = await tryFetch(`${base}/v8/finance/chart/${sym}?interval=1d&range=5d`, 8000);
     const meta = d?.chart?.result?.[0]?.meta;
-    if (meta && meta.regularMarketPrice) {
-      return {
-        symbol,
-        regularMarketPrice: meta.regularMarketPrice,
-        shortName: meta.longName || meta.symbol || symbol,
-      };
-    }
+    if (meta?.regularMarketPrice) return {symbol:sym, regularMarketPrice:meta.regularMarketPrice, shortName:meta.longName||sym};
   }
   return null;
 }
-
-async function fetchAllPrices(symbols) {
-  setStatus('busy', 'fetching…');
-
-  // Attempt 1: batch v7
-  const batch = await fetchV7Batch(symbols);
+let fetchBusy = false;
+async function refreshPrices() {
+  if (fetchBusy) return;
+  fetchBusy = true;
+  document.getElementById('refreshBtn').classList.add('spinning');
+  hideNotice(); setStatus('busy','fetching…');
+  const syms   = portfolio.map(p => p.ticker.toUpperCase());
+  let   loaded = 0;
+  const batch  = await fetchV7Batch(syms);
   if (batch) {
     const map = {};
     batch.forEach(q => { map[q.symbol.toUpperCase()] = q; });
-    // Check we got real prices
-    const priced = symbols.filter(s => map[s]?.regularMarketPrice);
-    if (priced.length > 0) return { source:'v7', map };
-  }
-
-  // Attempt 2: individual v8 chart per symbol
-  setStatus('busy', 'trying v8…');
-  const map2 = {};
-  const tasks = symbols.map(s => fetchV8Single(s).then(q => { if(q) map2[s] = q; }));
-  await Promise.all(tasks);
-  if (Object.keys(map2).length > 0) return { source:'v8', map: map2 };
-
-  return null;
-}
-
-let fetchInProgress = false;
-async function refreshPrices() {
-  if (fetchInProgress) return;
-  fetchInProgress = true;
-  const btn = document.getElementById('refreshBtn');
-  btn.classList.add('spinning');
-  hideNotice();
-
-  const symbols = portfolio.map(p => p.ticker.toUpperCase());
-  const result  = await fetchAllPrices(symbols);
-
-  if (result) {
-    let loaded = 0;
     portfolio.forEach(p => {
-      const q = result.map[p.ticker.toUpperCase()];
-      if (q?.regularMarketPrice) {
-        p.curPrice = q.regularMarketPrice;
-        p.name     = q.shortName || q.longName || '';
-        loaded++;
-      }
+      const q = map[p.ticker.toUpperCase()];
+      if (q?.regularMarketPrice) { p.curPrice = q.regularMarketPrice; p.name = q.shortName||''; loaded++; }
     });
-    save();
-    const now = new Date();
-    if (loaded === portfolio.length) {
-      setStatus('ok', 'updated ' + now.toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'}));
-    } else {
-      setStatus('ok', `${loaded}/${portfolio.length} loaded`);
-      showNotice('warn',
-        `${portfolio.length - loaded} ticker(s) failed to load. ` +
-        `Click the price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.`);
-    }
-  } else {
-    setStatus('err', 'fetch failed');
-    showNotice('warn',
-      'Could not reach Yahoo Finance through any proxy. Markets may be closed, or your network is blocking the request. ' +
-      '<a onclick="refreshPrices()">Retry</a> or click any price cell to enter it manually.');
   }
-
-  renderTable();
-  renderSummary();
-  btn.classList.remove('spinning');
-  fetchInProgress = false;
+  if (loaded < syms.length) {
+    setStatus('busy','trying v8…');
+    const missing = portfolio.filter(p => p.curPrice == null);
+    await Promise.all(missing.map(async p => {
+      const q = await fetchV8Single(p.ticker);
+      if (q?.regularMarketPrice) { p.curPrice = q.regularMarketPrice; p.name = q.shortName||''; loaded++; }
+    }));
+  }
+  await save();
+  if (loaded === syms.length) {
+    setStatus('ok','updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+  } else if (loaded > 0) {
+    setStatus('ok',`${loaded}/${syms.length} loaded`);
+    showNotice('warn',`${syms.length-loaded} ticker(s) failed. Click any price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.`);
+  } else {
+    setStatus('err','fetch failed');
+    showNotice('warn','Could not reach Yahoo Finance. Click any price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.');
+  }
+  renderTable(); renderSummary();
+  document.getElementById('refreshBtn').classList.remove('spinning');
+  fetchBusy = false;
 }
-
-// Fetch a single ticker (used after adding)
 async function fetchOne(ticker) {
-  const r = await fetchAllPrices([ticker.toUpperCase()]);
-  if (r) {
-    const q = r.map[ticker.toUpperCase()];
+  const syms = [ticker.toUpperCase()];
+  const b = await fetchV7Batch(syms) || (await fetchV8Single(ticker) ? [await fetchV8Single(ticker)] : null);
+  if (b) {
+    const q = b.find(x => x.symbol?.toUpperCase() === ticker.toUpperCase());
     if (q?.regularMarketPrice) {
       const idx = portfolio.findIndex(p => p.ticker === ticker);
-      if (idx > -1) {
-        portfolio[idx].curPrice = q.regularMarketPrice;
-        portfolio[idx].name     = q.shortName || '';
-        save();
-        renderTable();
-        renderSummary();
-      }
+      if (idx>-1) { portfolio[idx].curPrice = q.regularMarketPrice; portfolio[idx].name = q.shortName||''; await save(); renderTable(); renderSummary(); }
     }
   }
 }
 
-// ─── TIER LOGIC ───────────────────────────────────────────────────────────────
+// ── TIER + BUYBACK ────────────────────────────────────────────────────────────
 function getTier(gainPct, override) {
-  if (override != null && override > 0) return {label:'Custom', cls:'tier-na', trailPct: override};
-  if (gainPct == null)  return {label:'—',     cls:'tier-na', trailPct: null};
-  if (gainPct < 0)      return {label:'Watch',  cls:'tier-w',  trailPct: null};
-  if (gainPct < 10)     return {label:'T1',      cls:'tier-1',  trailPct: 0};
-  if (gainPct < 30)     return {label:'T2',      cls:'tier-2',  trailPct: 15};
-  if (gainPct < 60)     return {label:'T3',      cls:'tier-3',  trailPct: 12};
-  return                       {label:'T4',      cls:'tier-4',  trailPct: 8};
+  if (override!=null&&override>0) return {label:'Custom',cls:'tier-na',trailPct:override};
+  if (gainPct==null) return {label:'—',cls:'tier-na',trailPct:null};
+  if (gainPct< 0)   return {label:'Watch',cls:'tier-w', trailPct:null};
+  if (gainPct<10)   return {label:'T1',   cls:'tier-1', trailPct:0};
+  if (gainPct<30)   return {label:'T2',   cls:'tier-2', trailPct:15};
+  if (gainPct<60)   return {label:'T3',   cls:'tier-3', trailPct:12};
+  return                   {label:'T4',   cls:'tier-4', trailPct:8};
+}
+function calcBuyback(buy, cur, stop, trailPct) {
+  if (cur==null) return null;
+  if (trailPct===null) return cur*0.95;
+  if (trailPct===0)    return buy*0.95;
+  return stop*(1-(trailPct/2)/100);
 }
 
-// Buyback = stop × (1 − trail/2 %)
-// For breakeven stop (trail=0): 5% below buy price
-// For Watch (no stop): 5% below current price (further dip target)
-function calcBuyback(buy, curPrice, stop, trailPct) {
-  if (curPrice == null) return null;
-  if (trailPct === null) return curPrice * 0.95;          // Watch: 5% below current
-  if (trailPct === 0)   return buy * 0.95;                // Breakeven: 5% below buy price
-  return stop * (1 - (trailPct / 2) / 100);              // Standard: half-trail below stop
-}
-
-// ─── SORT ─────────────────────────────────────────────────────────────────────
+// ── SORT ──────────────────────────────────────────────────────────────────────
 function toggleSort() {
-  sortState = sortState === 'asc' ? 'desc' : sortState === 'desc' ? 'none' : 'asc';
-  const btn   = document.getElementById('sortBtn');
-  const label = document.getElementById('sortLabel');
-  const arrow = document.getElementById('sortArrow');
-  if (sortState === 'asc')  { btn.classList.add('active');    label.textContent = 'A–Z'; arrow.textContent = '↑'; arrow.style.opacity = '1'; }
-  if (sortState === 'desc') { btn.classList.add('active');    label.textContent = 'Z–A'; arrow.textContent = '↓'; arrow.style.opacity = '1'; }
-  if (sortState === 'none') { btn.classList.remove('active'); label.textContent = 'A–Z'; arrow.style.opacity = '0'; }
+  sortState = sortState==='asc'?'desc':sortState==='desc'?'none':'asc';
+  const btn=document.getElementById('sortBtn'), lbl=document.getElementById('sortLabel'), arr=document.getElementById('sortArrow');
+  if (sortState==='asc')  {btn.classList.add('active');   lbl.textContent='A–Z';arr.textContent='↑';arr.style.opacity='1'}
+  if (sortState==='desc') {btn.classList.add('active');   lbl.textContent='Z–A';arr.textContent='↓';arr.style.opacity='1'}
+  if (sortState==='none') {btn.classList.remove('active');lbl.textContent='A–Z';arr.style.opacity='0'}
   renderTable();
 }
-
 function getViewIndices() {
-  const idx = portfolio.map((_, i) => i);
-  if (sortState === 'asc')  idx.sort((a, b) => portfolio[a].ticker.localeCompare(portfolio[b].ticker));
-  if (sortState === 'desc') idx.sort((a, b) => portfolio[b].ticker.localeCompare(portfolio[a].ticker));
+  const idx=portfolio.map((_,i)=>i);
+  if (sortState==='asc')  idx.sort((a,b)=>portfolio[a].ticker.localeCompare(portfolio[b].ticker));
+  if (sortState==='desc') idx.sort((a,b)=>portfolio[b].ticker.localeCompare(portfolio[a].ticker));
   return idx;
 }
 
-// ─── RENDER TABLE ─────────────────────────────────────────────────────────────
+// ── RENDER TABLE ──────────────────────────────────────────────────────────────
 function renderTable() {
-  const tbody = document.getElementById('tbody');
-  if (portfolio.length === 0) {
-    tbody.innerHTML = `<tr><td colspan="9"><div class="empty-state">No positions yet. Add one above.</div></td></tr>`;
-    return;
-  }
-  const viewIndices = getViewIndices();
-  tbody.innerHTML = viewIndices.map(ri => {
-    const p   = portfolio[ri];
-    const cur = p.curPrice;
-    const gainPct = cur != null ? (cur - p.buy) / p.buy * 100 : null;
-    const tier    = getTier(gainPct, p.trail);
-    const stop    = tier.trailPct == null ? null
-                  : tier.trailPct === 0  ? p.buy
-                  : cur * (1 - tier.trailPct / 100);
-    const protPct   = (stop != null) ? (stop - p.buy) / p.buy * 100 : null;
-    const buyback   = calcBuyback(p.buy, cur, stop, tier.trailPct);
-    const bbLimit   = buyback != null ? buyback * 1.01 : null; // conditional order limit Y
-    const barW    = gainPct != null ? Math.min(Math.abs(gainPct), 60) / 60 * 100 : 0;
-    const gc      = gainPct == null ? '' : gainPct >= 0 ? 'pos' : 'neg';
+  const tbody=document.getElementById('tbody');
+  if (!portfolio.length) { tbody.innerHTML=`<tr><td colspan="9"><div class="empty-state">No positions yet. Add one above.</div></td></tr>`; return; }
+  tbody.innerHTML=getViewIndices().map(ri=>{
+    const p=portfolio[ri], cur=p.curPrice;
+    const gainPct=cur!=null?(cur-p.buy)/p.buy*100:null;
+    const tier=getTier(gainPct,p.trail);
+    const stop=tier.trailPct==null?null:tier.trailPct===0?p.buy:cur*(1-tier.trailPct/100);
+    const protPct=stop!=null?(stop-p.buy)/p.buy*100:null;
+    const buyback=calcBuyback(p.buy,cur,stop,tier.trailPct);
+    const bbLim=buyback!=null?buyback*1.01:null;
+    const dipPct=tier.trailPct===null||tier.trailPct===0?5:tier.trailPct/2;
+    const dipRef=tier.trailPct===null?'cur price':'stop price';
+    const barW=gainPct!=null?Math.min(Math.abs(gainPct),60)/60*100:0;
+    const gc=gainPct==null?'':gainPct>=0?'pos':'neg';
 
-    const gainHTML = gainPct != null
-      ? `<span class="gain-pct ${gc}">${gainPct >= 0?'+':''}${gainPct.toFixed(2)}%</span>
-         <div class="gain-bar-wrap"><div class="gain-bar ${gc}" style="width:${barW.toFixed(1)}%"></div></div>`
-      : `<span class="gain-pct" style="color:var(--muted)">—</span>`;
+    const gainHTML=gainPct!=null
+      ?`<span class="gain-pct ${gc}">${gainPct>=0?'+':''}${gainPct.toFixed(2)}%</span><div class="gain-bar-wrap"><div class="gain-bar ${gc}" style="width:${barW.toFixed(1)}%"></div></div>`
+      :`<span class="gain-pct" style="color:var(--muted)">—</span>`;
 
-    // ── Buy price cell (always has a value, always editable) ──
-    const buyHTML =
-      `<span class="price-display" id="bpd-${ri}">
-         $${p.buy.toFixed(2)}
-         <svg class="edit-icon" onclick="startBuyEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit buy price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-       </span>
-       <span class="price-input-wrap" id="bpi-${ri}">
-         <input type="number" id="bpv-${ri}" step="0.01" min="0" value="${p.buy.toFixed(2)}" onkeydown="buyPriceKey(event,${ri})" style="width:88px" />
-         <button class="price-ok-btn" onclick="confirmBuyEdit(${ri})">✓</button>
-         <button class="price-cancel-btn" onclick="cancelBuyEdit(${ri})">✕</button>
-       </span>`;
+    const editSVG=`<svg class="edit-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>`;
+    const inpHTML=(id,val,fn,key)=>`<span class="price-input-wrap" id="${id}i">
+      <input type="number" id="${id}v" step="0.01" min="0" ${val?`value="${val}"`:'placeholder="enter price"'} onkeydown="${key}(event,${ri})" style="width:88px"/>
+      <button class="price-ok-btn" onclick="${fn}(${ri})">✓</button>
+      <button class="price-cancel-btn" onclick="cancel${fn.replace('confirm','')}(${ri})">✕</button>
+    </span>`;
 
-    // ── Current price cell ──
-    const curHTML = cur != null
-      ? `<span class="price-display" id="pd-${ri}">
-           $${cur.toFixed(2)}
-           <svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-         </span>
-         <span class="price-input-wrap" id="pi-${ri}">
-           <input type="number" id="pv-${ri}" step="0.01" min="0" value="${cur.toFixed(2)}" onkeydown="priceKey(event,${ri})" style="width:88px" />
-           <button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button>
-           <button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button>
-         </span>`
-      : `<span class="price-display" id="pd-${ri}">
-           <span class="price-loading">loading…</span>
-           <svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Enter price manually"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg>
-         </span>
-         <span class="price-input-wrap" id="pi-${ri}">
-           <input type="number" id="pv-${ri}" step="0.01" min="0" placeholder="enter price" onkeydown="priceKey(event,${ri})" style="width:88px" />
-           <button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button>
-           <button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button>
-         </span>`;
+    const buyHTML=`<span class="price-display" id="bpd-${ri}">$${p.buy.toFixed(2)}<svg class="edit-icon" onclick="startBuyEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit buy price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span>
+    <span class="price-input-wrap" id="bpi-${ri}"><input type="number" id="bpv-${ri}" step="0.01" min="0" value="${p.buy.toFixed(2)}" onkeydown="buyPriceKey(event,${ri})" style="width:88px"/><button class="price-ok-btn" onclick="confirmBuyEdit(${ri})">✓</button><button class="price-cancel-btn" onclick="cancelBuyEdit(${ri})">✕</button></span>`;
 
-    const stopHTML = stop != null
-      ? `<div class="stop-cell">
-           <span class="stop-price">$${stop.toFixed(2)}</span>
-           <span class="stop-trail">${tier.trailPct===0?'breakeven':tier.trailPct+'% trail'}</span>
-         </div>`
-      : `<span class="stop-trail" style="color:var(--muted)">${cur==null?'—':'monitor'}</span>`;
+    const curHTML=cur!=null
+      ?`<span class="price-display" id="pd-${ri}">$${cur.toFixed(2)}<svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Edit price"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span><span class="price-input-wrap" id="pi-${ri}"><input type="number" id="pv-${ri}" step="0.01" min="0" value="${cur.toFixed(2)}" onkeydown="priceKey(event,${ri})" style="width:88px"/><button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button><button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button></span>`
+      :`<span class="price-display" id="pd-${ri}"><span class="price-loading">loading…</span><svg class="edit-icon" onclick="startEdit(${ri})" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" title="Enter manually"><path d="M11 4H4a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h14a2 2 0 0 0 2-2v-7"/><path d="M18.5 2.5a2.121 2.121 0 0 1 3 3L12 15l-4 1 1-4 9.5-9.5z"/></svg></span><span class="price-input-wrap" id="pi-${ri}"><input type="number" id="pv-${ri}" step="0.01" min="0" placeholder="enter price" onkeydown="priceKey(event,${ri})" style="width:88px"/><button class="price-ok-btn" onclick="confirmEdit(${ri})">✓</button><button class="price-cancel-btn" onclick="cancelEdit(${ri})">✕</button></span>`;
 
-    const protHTML = protPct != null
-      ? `<span class="protected ${protPct>=0?'pos':'neg'}">${protPct>=0?'+':''}${protPct.toFixed(1)}%</span>`
-      : `<span class="protected na">—</span>`;
+    const stopHTML=stop!=null
+      ?`<div class="stop-cell"><span class="stop-price">$${stop.toFixed(2)}</span><span class="stop-trail">${tier.trailPct===0?'breakeven':tier.trailPct+'% trail'}</span></div>`
+      :`<span class="stop-trail" style="color:var(--muted)">${cur==null?'—':'monitor'}</span>`;
 
-    const dipPct = tier.trailPct === null ? 5
-                 : tier.trailPct === 0   ? 5
-                 : tier.trailPct / 2;
-    const dipRef = tier.trailPct === null ? 'cur price' : 'stop price';
+    const protHTML=protPct!=null
+      ?`<span class="protected ${protPct>=0?'pos':'neg'}">${protPct>=0?'+':''}${protPct.toFixed(1)}%</span>`
+      :`<span class="protected na">—</span>`;
 
-    const buybackHTML = buyback != null
-      ? `<div class="buyback-cell">
-           <div class="bb-row">
-             <span class="bb-label">Trigger = ${dipPct}% below ${dipRef} =</span>
-             <span class="bb-value">$${buyback.toFixed(2)}</span>
-           </div>
-           <div class="bb-row">
-             <span class="bb-label">Limit buy = Trigger × 1.01 =</span>
-             <span class="bb-value bb-limit">$${bbLimit.toFixed(2)}</span>
-           </div>
-         </div>`
-      : `<span style="color:var(--muted);font-family:var(--mono)">—</span>`;
+    const buybackHTML=buyback!=null
+      ?`<div class="buyback-cell"><div class="bb-row"><span class="bb-label">Trigger = ${dipPct}% below ${dipRef} =</span><span class="bb-value">$${buyback.toFixed(2)}</span></div><div class="bb-row"><span class="bb-label">Limit buy = Trigger × 1.01 =</span><span class="bb-value bb-limit">$${bbLim.toFixed(2)}</span></div></div>`
+      :`<span style="color:var(--muted);font-family:var(--mono)">—</span>`;
 
     return `<tr>
       <td><div class="ticker-cell"><span class="ticker-sym">${esc(p.ticker)}</span><span class="ticker-name">${esc(p.name||'')}</span></div></td>
-      <td>${buyHTML}</td>
-      <td>${curHTML}</td>
+      <td>${buyHTML}</td><td>${curHTML}</td>
       <td><div class="gain-cell">${gainHTML}</div></td>
       <td><span class="tier-badge ${tier.cls}">${tier.label}</span></td>
-      <td>${stopHTML}</td>
-      <td>${protHTML}</td>
-      <td>${buybackHTML}</td>
+      <td>${stopHTML}</td><td>${protHTML}</td><td>${buybackHTML}</td>
       <td><button class="delete-btn" onclick="deleteStock(${ri})" title="Remove ${esc(p.ticker)}">
         <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/><path d="M10 11v6M14 11v6"/><path d="M9 6V4h6v2"/></svg>
       </button></td>
@@ -710,119 +795,62 @@ function renderTable() {
   }).join('');
 }
 
-// ─── INLINE CURRENT PRICE EDIT ───────────────────────────────────────────────
-function startEdit(i) {
-  document.getElementById(`pd-${i}`).style.display = 'none';
-  const wrap = document.getElementById(`pi-${i}`);
-  wrap.style.display = 'inline-flex';
-  const inp = document.getElementById(`pv-${i}`);
-  inp.focus(); inp.select();
-}
-function cancelEdit(i) {
-  document.getElementById(`pi-${i}`).style.display = 'none';
-  document.getElementById(`pd-${i}`).style.display = '';
-}
-function confirmEdit(i) {
-  const val = parseFloat(document.getElementById(`pv-${i}`).value);
-  if (!isNaN(val) && val > 0) {
-    portfolio[i].curPrice = val;
-    save(); renderTable(); renderSummary();
-  } else { cancelEdit(i); }
-}
-function priceKey(e, i) {
-  if (e.key === 'Enter')  confirmEdit(i);
-  if (e.key === 'Escape') cancelEdit(i);
+// ── INLINE EDITS ──────────────────────────────────────────────────────────────
+function startEdit(i){document.getElementById(`pd-${i}`).style.display='none';document.getElementById(`pi-${i}`).style.display='inline-flex';const inp=document.getElementById(`pv-${i}`);inp.focus();inp.select()}
+function cancelEdit(i){document.getElementById(`pi-${i}`).style.display='none';document.getElementById(`pd-${i}`).style.display=''}
+async function confirmEdit(i){const v=parseFloat(document.getElementById(`pv-${i}`).value);if(!isNaN(v)&&v>0){portfolio[i].curPrice=v;await save();renderTable();renderSummary()}else cancelEdit(i)}
+function priceKey(e,i){if(e.key==='Enter')confirmEdit(i);if(e.key==='Escape')cancelEdit(i)}
+
+function startBuyEdit(i){document.getElementById(`bpd-${i}`).style.display='none';document.getElementById(`bpi-${i}`).style.display='inline-flex';const inp=document.getElementById(`bpv-${i}`);inp.focus();inp.select()}
+function cancelBuyEdit(i){document.getElementById(`bpi-${i}`).style.display='none';document.getElementById(`bpd-${i}`).style.display=''}
+async function confirmBuyEdit(i){const v=parseFloat(document.getElementById(`bpv-${i}`).value);if(!isNaN(v)&&v>0){portfolio[i].buy=parseFloat(v.toFixed(4));await save();renderTable();renderSummary()}else cancelBuyEdit(i)}
+function buyPriceKey(e,i){if(e.key==='Enter')confirmBuyEdit(i);if(e.key==='Escape')cancelBuyEdit(i)}
+
+// ── SUMMARY ───────────────────────────────────────────────────────────────────
+function renderSummary(){
+  const loaded=portfolio.filter(p=>p.curPrice!=null);
+  document.getElementById('mPos').textContent=portfolio.length;
+  document.getElementById('mWL').textContent=loaded.filter(p=>p.curPrice>=p.buy).length+' / '+loaded.filter(p=>p.curPrice<p.buy).length;
+  if(!loaded.length)return;
+  const r=[...loaded].map(p=>({t:p.ticker,g:(p.curPrice-p.buy)/p.buy*100})).sort((a,b)=>b.g-a.g);
+  const best=r[0],worst=r[r.length-1];
+  document.getElementById('mBest').textContent=(best.g>=0?'+':'')+best.g.toFixed(1)+'%';
+  document.getElementById('mBestN').textContent=best.t;
+  document.getElementById('mWorst').textContent=(worst.g>=0?'+':'')+worst.g.toFixed(1)+'%';
+  document.getElementById('mWorstN').textContent=worst.t;
 }
 
-// ─── INLINE BUY PRICE EDIT ───────────────────────────────────────────────────
-function startBuyEdit(i) {
-  document.getElementById(`bpd-${i}`).style.display = 'none';
-  document.getElementById(`bpi-${i}`).style.display = 'inline-flex';
-  const inp = document.getElementById(`bpv-${i}`);
-  inp.focus(); inp.select();
-}
-function cancelBuyEdit(i) {
-  document.getElementById(`bpi-${i}`).style.display = 'none';
-  document.getElementById(`bpd-${i}`).style.display = '';
-}
-function confirmBuyEdit(i) {
-  const val = parseFloat(document.getElementById(`bpv-${i}`).value);
-  if (!isNaN(val) && val > 0) {
-    portfolio[i].buy = parseFloat(val.toFixed(4));
-    save(); renderTable(); renderSummary();
-  } else { cancelBuyEdit(i); }
-}
-function buyPriceKey(e, i) {
-  if (e.key === 'Enter')  confirmBuyEdit(i);
-  if (e.key === 'Escape') cancelBuyEdit(i);
-}
-
-// ─── SUMMARY ─────────────────────────────────────────────────────────────────
-function renderSummary() {
-  const loaded = portfolio.filter(p => p.curPrice != null);
-  document.getElementById('mPos').textContent = portfolio.length;
-  document.getElementById('mWL').textContent  =
-    loaded.filter(p => p.curPrice >= p.buy).length + ' / ' +
-    loaded.filter(p => p.curPrice <  p.buy).length;
-  if (!loaded.length) return;
-  const ranked = [...loaded].map(p => ({t:p.ticker, g:(p.curPrice-p.buy)/p.buy*100}))
-                             .sort((a,b)=>b.g-a.g);
-  const best = ranked[0], worst = ranked[ranked.length-1];
-  document.getElementById('mBest').textContent   = (best.g>=0?'+':'')+best.g.toFixed(1)+'%';
-  document.getElementById('mBestN').textContent  = best.t;
-  document.getElementById('mWorst').textContent  = (worst.g>=0?'+':'')+worst.g.toFixed(1)+'%';
-  document.getElementById('mWorstN').textContent = worst.t;
-}
-
-// ─── ADD / DELETE ─────────────────────────────────────────────────────────────
-function addStock() {
-  const ticker = document.getElementById('inTicker').value.trim().toUpperCase();
-  const buyRaw = document.getElementById('inBuy').value.trim();
-  const trailR = document.getElementById('inTrail').value.trim();
-  if (!ticker)                          { showAddErr('Enter a ticker.'); return; }
-  if (!buyRaw || isNaN(+buyRaw) || +buyRaw <= 0) { showAddErr('Enter a valid buy price.'); return; }
-  if (portfolio.some(p => p.ticker === ticker))   { showAddErr(ticker+' already in portfolio.'); return; }
+// ── ADD / DELETE ──────────────────────────────────────────────────────────────
+async function addStock(){
+  const ticker=document.getElementById('inTicker').value.trim().toUpperCase();
+  const buyRaw=document.getElementById('inBuy').value.trim();
+  const trailR=document.getElementById('inTrail').value.trim();
+  if(!ticker){showAddErr('Enter a ticker.');return}
+  if(!buyRaw||isNaN(+buyRaw)||+buyRaw<=0){showAddErr('Enter a valid buy price.');return}
+  if(portfolio.some(p=>p.ticker===ticker)){showAddErr(ticker+' already in portfolio.');return}
   hideAddErr();
-  portfolio.push({ticker, buy:parseFloat((+buyRaw).toFixed(4)), trail:trailR&&!isNaN(+trailR)?+trailR:null, curPrice:null, name:''});
-  save(); renderTable(); renderSummary();
-  document.getElementById('inTicker').value = '';
-  document.getElementById('inBuy').value    = '';
-  document.getElementById('inTrail').value  = '';
+  portfolio.push({ticker,buy:parseFloat((+buyRaw).toFixed(4)),trail:trailR&&!isNaN(+trailR)?+trailR:null,curPrice:null,name:''});
+  await save(); renderTable(); renderSummary();
+  document.getElementById('inTicker').value='';
+  document.getElementById('inBuy').value='';
+  document.getElementById('inTrail').value='';
   fetchOne(ticker);
 }
-function deleteStock(i) { portfolio.splice(i,1); save(); renderTable(); renderSummary(); }
-function showAddErr(m) { const e=document.getElementById('addError'); e.textContent=m; e.style.display='block'; }
-function hideAddErr()  { document.getElementById('addError').style.display='none'; }
+async function deleteStock(i){portfolio.splice(i,1);await save();renderTable();renderSummary()}
+function showAddErr(m){const e=document.getElementById('addError');e.textContent=m;e.style.display='block'}
+function hideAddErr(){document.getElementById('addError').style.display='none'}
 
-// ─── STATUS / NOTICE ─────────────────────────────────────────────────────────
-function setStatus(type, text) {
-  const p = document.getElementById('statusPill');
-  p.className = 'status-pill ' + type;
-  document.getElementById('statusText').textContent = text;
-}
-function showNotice(type, html) {
-  const w = document.getElementById('noticeWrap');
-  const b = document.getElementById('noticeBox');
-  b.className = 'notice ' + type;
-  document.getElementById('noticeText').innerHTML = html;
-  w.style.display = 'block';
-}
-function hideNotice() { document.getElementById('noticeWrap').style.display='none'; }
+// ── STATUS / NOTICE ───────────────────────────────────────────────────────────
+function setStatus(t,txt){const p=document.getElementById('statusPill');p.className='status-pill '+t;document.getElementById('statusText').textContent=txt}
+function showNotice(t,html){const w=document.getElementById('noticeWrap'),b=document.getElementById('noticeBox');b.className='notice '+t;document.getElementById('noticeText').innerHTML=html;w.style.display='block'}
+function hideNotice(){document.getElementById('noticeWrap').style.display='none'}
+function esc(s){return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;')}
 
-function esc(s) {
-  return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-}
-
-// Enter key on add form
-['inTicker','inBuy','inTrail'].forEach(id => {
-  document.getElementById(id).addEventListener('keydown', e => { if(e.key==='Enter') addStock(); });
+// ── INIT ──────────────────────────────────────────────────────────────────────
+document.getElementById('pwInput').addEventListener('keydown', e => { if(e.key==='Enter') unlock(); });
+['inTicker','inBuy','inTrail'].forEach(id=>{
+  document.getElementById(id).addEventListener('keydown',e=>{if(e.key==='Enter')addStock()});
 });
-
-// ─── INIT ─────────────────────────────────────────────────────────────────────
-loadPortfolio();
-renderTable();
-renderSummary();
-refreshPrices();
 </script>
 </body>
 </html>
