@@ -92,6 +92,20 @@ body{background:var(--bg);color:var(--text);font-family:var(--ui);min-height:100
 #importErr{font-size:12px;color:var(--red);font-family:var(--mono);margin-top:8px;min-height:16px}
 #copyFeedback{font-size:12px;color:var(--green);font-family:var(--mono)}
 
+/* ── SETTINGS PANEL ──────────────────────────────────────────── */
+#settingsPanel{
+  background:var(--surface2);border:1px solid var(--border2);
+  border-radius:var(--radius-lg);padding:20px 22px;margin-bottom:20px;display:none;
+}
+.settings-title{font-family:var(--head);font-size:12px;font-weight:600;color:var(--muted2);
+  letter-spacing:0.06em;text-transform:uppercase;margin-bottom:14px}
+.settings-row{display:flex;align-items:flex-end;gap:10px;flex-wrap:wrap}
+.settings-status{font-size:11px;font-family:var(--mono);margin-top:8px}
+.settings-status.ok {color:var(--green)}.settings-status.miss{color:var(--amber)}
+.settings-hint{font-size:11px;color:var(--muted);margin-top:10px;line-height:1.6}
+.settings-hint a{color:var(--blue);text-decoration:none}
+.settings-hint a:hover{text-decoration:underline}
+
 /* ── HEADER ───────────────────────────────────────────────────── */
 header{padding:28px 0 18px;border-bottom:1px solid var(--border);margin-bottom:28px}
 .header-inner{display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:14px}
@@ -336,6 +350,10 @@ tbody tr{animation:fadeSlideIn 0.2s ease both}
         <p>trailing stop dashboard · live prices</p>
       </div>
       <div class="header-actions">
+        <button class="btn" id="settingsBtn" onclick="toggleSettings()" title="API key settings">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.07 4.93a10 10 0 0 1 0 14.14M4.93 4.93a10 10 0 0 0 0 14.14"/><path d="M15.54 8.46a5 5 0 0 1 0 7.07M8.46 8.46a5 5 0 0 0 0 7.07"/></svg>
+          API Key
+        </button>
         <button class="btn" onclick="showImportModal()" title="Import portfolio from another device">
           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>
           Import
@@ -364,6 +382,24 @@ tbody tr{animation:fadeSlideIn 0.2s ease both}
     <div class="notice warn" id="noticeBox">
       <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="12"/><line x1="12" y1="16" x2="12.01" y2="16"/></svg>
       <span id="noticeText"></span>
+    </div>
+  </div>
+
+  <div id="settingsPanel">
+    <div class="settings-title">Price Data · Finnhub API Key</div>
+    <div class="settings-row">
+      <div class="field">
+        <label>Finnhub API key</label>
+        <input type="text" id="finnhubKeyInput" placeholder="Paste key here…" style="width:260px;font-family:var(--mono);font-size:12px" autocomplete="off"/>
+      </div>
+      <button class="btn primary" onclick="saveApiKey()">Save key</button>
+      <button class="btn" onclick="clearApiKey()">Clear</button>
+    </div>
+    <div class="settings-status miss" id="keyStatus">No API key set — using fallback (unreliable)</div>
+    <div class="settings-hint">
+      Get a free key at <a href="https://finnhub.io/register" target="_blank">finnhub.io/register</a> (takes ~1 min, no credit card).
+      Free tier: 60 calls/min · US stocks · 15-min delayed outside market hours.<br/>
+      Your key is stored in your browser only and never transmitted to anyone except Finnhub.
     </div>
   </div>
 
@@ -542,6 +578,7 @@ async function unlock() {
     sessionPw  = pw;
     document.getElementById('pwOverlay').style.display = 'none';
     document.getElementById('appWrap').style.display   = 'block';
+    updateKeyStatus(getFinnhubKey());
     renderTable(); renderSummary(); refreshPrices();
   } catch(e) { pwErr('Error: ' + e.message); setPwBusy(false); }
 }
@@ -613,14 +650,68 @@ async function doImport() {
 function closeModal() { document.getElementById('modalBackdrop').classList.remove('open'); }
 function closeModalOutside(e) { if (e.target === document.getElementById('modalBackdrop')) closeModal(); }
 
+// ── SETTINGS ─────────────────────────────────────────────────────────────────
+const FKEY = 'portStops_finnhubKey';
+function getFinnhubKey()    { return localStorage.getItem(FKEY) || ''; }
+function setFinnhubKey(k)   { k ? localStorage.setItem(FKEY,k) : localStorage.removeItem(FKEY); }
+
+function toggleSettings() {
+  const p = document.getElementById('settingsPanel');
+  const btn = document.getElementById('settingsBtn');
+  const open = p.style.display === 'block';
+  p.style.display = open ? 'none' : 'block';
+  btn.classList.toggle('active', !open);
+  if (!open) {
+    const k = getFinnhubKey();
+    document.getElementById('finnhubKeyInput').value = k;
+    updateKeyStatus(k);
+  }
+}
+function updateKeyStatus(k) {
+  const el = document.getElementById('keyStatus');
+  if (k) { el.textContent = '✓ Finnhub key set — live prices active'; el.className='settings-status ok'; }
+  else   { el.textContent = 'No API key set — using fallback (unreliable)'; el.className='settings-status miss'; }
+}
+function saveApiKey() {
+  const k = document.getElementById('finnhubKeyInput').value.trim();
+  setFinnhubKey(k); updateKeyStatus(k);
+  if (k) { toggleSettings(); refreshPrices(); }
+}
+function clearApiKey() {
+  setFinnhubKey('');
+  document.getElementById('finnhubKeyInput').value = '';
+  updateKeyStatus('');
+}
+
 // ── FETCHING ──────────────────────────────────────────────────────────────────
+// Primary: Finnhub (direct, no proxy, reliable)
+async function fetchFinnhub(symbols) {
+  const key = getFinnhubKey();
+  if (!key) return null;
+  const results = await Promise.all(symbols.map(async sym => {
+    try {
+      const ctrl = new AbortController();
+      setTimeout(() => ctrl.abort(), 6000);
+      const r = await fetch(`https://finnhub.io/api/v1/quote?symbol=${sym}&token=${key}`, {signal:ctrl.signal});
+      if (!r.ok) return null;
+      const d = await r.json();
+      // d.c = current price; d.pc = previous close
+      const price = d.c > 0 ? d.c : (d.pc > 0 ? d.pc : null);
+      if (!price) return null;
+      return {symbol:sym, regularMarketPrice:price, shortName:sym};
+    } catch { return null; }
+  }));
+  const valid = results.filter(Boolean);
+  return valid.length ? valid : null;
+}
+
+// Fallback: Yahoo Finance via CORS proxies
 const PROXIES = [
-  u => u,
   u => `https://api.allorigins.win/raw?url=${encodeURIComponent(u)}`,
   u => `https://corsproxy.io/?url=${encodeURIComponent(u)}`,
-  u => `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(u)}`,
+  u => `https://thingproxy.freeboard.io/fetch/${u}`,
 ];
-async function tryFetch(url, ms=6000) {
+async function tryFetch(url, ms=7000) {
   for (const px of PROXIES) {
     try {
       const ctrl = new AbortController();
@@ -631,73 +722,91 @@ async function tryFetch(url, ms=6000) {
       const txt = await r.text();
       if (!txt || txt.trim()[0] !== '{') continue;
       return JSON.parse(txt);
-    } catch { /* next */ }
+    } catch { /* next proxy */ }
   }
   return null;
 }
-async function fetchV7Batch(syms) {
+async function fetchYahoo(syms) {
   for (const base of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
     const d = await tryFetch(`${base}/v7/finance/quote?symbols=${syms.join(',')}`);
     const r = d?.quoteResponse?.result;
     if (r?.length) return r;
   }
-  return null;
+  // v8 chart per-symbol as last resort
+  const results = await Promise.all(syms.map(async sym => {
+    for (const base of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
+      const d    = await tryFetch(`${base}/v8/finance/chart/${sym}?interval=1d&range=5d`, 9000);
+      const meta = d?.chart?.result?.[0]?.meta;
+      if (meta?.regularMarketPrice) return {symbol:sym, regularMarketPrice:meta.regularMarketPrice, shortName:sym};
+    }
+    return null;
+  }));
+  const valid = results.filter(Boolean);
+  return valid.length ? valid : null;
 }
-async function fetchV8Single(sym) {
-  for (const base of ['https://query1.finance.yahoo.com','https://query2.finance.yahoo.com']) {
-    const d    = await tryFetch(`${base}/v8/finance/chart/${sym}?interval=1d&range=5d`, 8000);
-    const meta = d?.chart?.result?.[0]?.meta;
-    if (meta?.regularMarketPrice) return {symbol:sym, regularMarketPrice:meta.regularMarketPrice, shortName:meta.longName||sym};
-  }
-  return null;
-}
+
 let fetchBusy = false;
 async function refreshPrices() {
   if (fetchBusy) return;
   fetchBusy = true;
   document.getElementById('refreshBtn').classList.add('spinning');
-  hideNotice(); setStatus('busy','fetching…');
-  const syms   = portfolio.map(p => p.ticker.toUpperCase());
-  let   loaded = 0;
-  const batch  = await fetchV7Batch(syms);
-  if (batch) {
-    const map = {};
-    batch.forEach(q => { map[q.symbol.toUpperCase()] = q; });
-    portfolio.forEach(p => {
-      const q = map[p.ticker.toUpperCase()];
-      if (q?.regularMarketPrice) { p.curPrice = q.regularMarketPrice; p.name = q.shortName||''; loaded++; }
-    });
+  hideNotice();
+  const syms = portfolio.map(p => p.ticker.toUpperCase());
+  const map  = {};
+  let   src  = '';
+
+  // ── 1. Try Finnhub ──
+  const hasFinnhubKey = !!getFinnhubKey();
+  if (hasFinnhubKey) {
+    setStatus('busy', 'fetching via Finnhub…');
+    const fh = await fetchFinnhub(syms);
+    if (fh) { fh.forEach(q => { map[q.symbol.toUpperCase()] = q; }); src = 'Finnhub'; }
   }
-  if (loaded < syms.length) {
-    setStatus('busy','trying v8…');
-    const missing = portfolio.filter(p => p.curPrice == null);
-    await Promise.all(missing.map(async p => {
-      const q = await fetchV8Single(p.ticker);
-      if (q?.regularMarketPrice) { p.curPrice = q.regularMarketPrice; p.name = q.shortName||''; loaded++; }
-    }));
+
+  // ── 2. Fill any gaps with Yahoo Finance ──
+  const missing = syms.filter(s => !map[s]);
+  if (missing.length) {
+    setStatus('busy', src ? 'filling gaps via Yahoo…' : 'fetching via Yahoo…');
+    const yh = await fetchYahoo(missing);
+    if (yh) { yh.forEach(q => { map[q.symbol?.toUpperCase()] = q; }); src = src ? src+' + Yahoo' : 'Yahoo'; }
   }
+
+  // ── 3. Apply results ──
+  let loaded = 0;
+  portfolio.forEach(p => {
+    const q = map[p.ticker.toUpperCase()];
+    if (q?.regularMarketPrice) { p.curPrice = q.regularMarketPrice; p.name = q.shortName||p.ticker; loaded++; }
+  });
   await save();
+
+  const time = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
   if (loaded === syms.length) {
-    setStatus('ok','updated '+new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}));
+    setStatus('ok', `updated ${time} · ${src}`);
   } else if (loaded > 0) {
-    setStatus('ok',`${loaded}/${syms.length} loaded`);
-    showNotice('warn',`${syms.length-loaded} ticker(s) failed. Click any price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.`);
+    setStatus('ok', `${loaded}/${syms.length} loaded · ${src}`);
+    showNotice('warn', `${syms.length-loaded} ticker(s) could not be fetched. Click the price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.`);
   } else {
-    setStatus('err','fetch failed');
-    showNotice('warn','Could not reach Yahoo Finance. Click any price cell to enter manually, or <a onclick="refreshPrices()">retry</a>.');
+    setStatus('err', 'fetch failed');
+    const keyHint = hasFinnhubKey
+      ? 'Both Finnhub and Yahoo Finance failed. Markets may be closed, or check your API key in <a onclick="toggleSettings()">Settings</a>.'
+      : 'Could not reach Yahoo Finance. Add a free <a onclick="toggleSettings()">Finnhub API key</a> for reliable prices — takes ~1 min to set up.';
+    showNotice('warn', keyHint);
   }
   renderTable(); renderSummary();
   document.getElementById('refreshBtn').classList.remove('spinning');
   fetchBusy = false;
 }
+
 async function fetchOne(ticker) {
-  const syms = [ticker.toUpperCase()];
-  const b = await fetchV7Batch(syms) || (await fetchV8Single(ticker) ? [await fetchV8Single(ticker)] : null);
-  if (b) {
-    const q = b.find(x => x.symbol?.toUpperCase() === ticker.toUpperCase());
-    if (q?.regularMarketPrice) {
-      const idx = portfolio.findIndex(p => p.ticker === ticker);
-      if (idx>-1) { portfolio[idx].curPrice = q.regularMarketPrice; portfolio[idx].name = q.shortName||''; await save(); renderTable(); renderSummary(); }
+  const sym = ticker.toUpperCase();
+  const fh  = getFinnhubKey() ? await fetchFinnhub([sym]) : null;
+  const result = fh?.[0] || (await fetchYahoo([sym]))?.[0];
+  if (result?.regularMarketPrice) {
+    const idx = portfolio.findIndex(p => p.ticker === ticker);
+    if (idx > -1) {
+      portfolio[idx].curPrice = result.regularMarketPrice;
+      portfolio[idx].name     = result.shortName || ticker;
+      await save(); renderTable(); renderSummary();
     }
   }
 }
